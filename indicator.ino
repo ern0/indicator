@@ -3,11 +3,17 @@
 
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(16,1,NEO_GRB | NEO_KHZ800);
-# define NONE (255)
-unsigned char pos = NONE;
+# define POS_NONE (255)
+unsigned char pos = POS_NONE;
 unsigned char colorIndex = 0;
 unsigned char color[3];
 bool show = false;
+bool posReset = true;
+
+# define MOD_IDLE (0)
+# define MOD_POS (1)
+# define MOD_DATA (2)
+unsigned char mod = MOD_IDLE;
 
 
 void setup() {
@@ -32,39 +38,70 @@ void loop() {
   unsigned char c = SerialUSB.read();
     
   switch (c) {
+
+    case '+': {
+      mod = MOD_POS;
+      pos = POS_NONE;
+      posReset = false;
+    } break;
+
     case ':': {
-      pos = 0;
+      mod = MOD_DATA;
+      if (posReset) pos = 0;
       colorIndex = 0;
     } break;
+    
     case ';': {
+      mod = MOD_IDLE;
       if (pos > 0) show = true;
-      pos = NONE;
-      colorIndex = 0;        
+      if (pos == POS_NONE) show = false;
+      pos = POS_NONE;
+      colorIndex = 0;  
+      posReset = true;      
     } break;
+    
   } // switch char
 
-  if (pos == NONE) return;
-  
-  bool isDigit = false;    
-  if (('0' <= c) && (c <= '9')) {
-    isDigit = true;
-    c = c - '0';
-  }
-  if (('a' <= c) && (c <= 'f')) {
-    isDigit = true;
-    c = c - ('a' - 10);
-  }
-  if (('A' <= c) && (c <= 'F')) {
-    isDigit = true;
-    c = c - ('A' - 10);
-  }
-  if (!isDigit) return;
+  switch (mod) {
 
-  color[colorIndex++] = c | (c << 4);
-  if (colorIndex < 3) return;
-
-  strip.setPixelColor(pos,strip.Color(color[0],color[1],color[2]));
-  colorIndex = 0;
-  pos++;
+    case MOD_DATA: {
+      if (pos == POS_NONE) return;
+      
+      bool isDigit = false;    
+      if (('0' <= c) && (c <= '9')) {
+        isDigit = true;
+        c = c - '0';
+      }
+      if (('a' <= c) && (c <= 'f')) {
+        isDigit = true;
+        c = c - ('a' - 10);
+      }
+      if (('A' <= c) && (c <= 'F')) {
+        isDigit = true;
+        c = c - ('A' - 10);
+      }
+      if (!isDigit) return;
     
+      color[colorIndex++] = c | (c << 4);
+      if (colorIndex < 3) return;
+    
+      strip.setPixelColor(pos,strip.Color(color[0],color[1],color[2]));
+      colorIndex = 0;
+      pos++;
+        
+    } break;
+
+    case MOD_POS: {
+      
+      if ((c < '0') || ('9' < c)) return;
+      if (pos == POS_NONE) pos = 0;
+
+      pos = 10 * pos;
+      pos += (c - '0');
+      pos = 3;
+            
+    } break;
+    
+  } // switch mod
+  
 } // loop()
