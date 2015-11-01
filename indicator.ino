@@ -98,7 +98,6 @@ void loop() {
 
       pos = 10 * pos;
       pos += (c - '0');
-      pos = 3;
             
     } break;
     
