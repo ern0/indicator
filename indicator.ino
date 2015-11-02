@@ -15,28 +15,28 @@ bool posReset = true;
 # define MOD_DATA (2)
 unsigned char mod = MOD_IDLE;
 
-
+ 
 void setup() {
   
   SerialUSB.begin();
   strip.begin();
   strip.setBrightness(30);
   
-} // setup()
+} // setup() 
 
 
 void loop() {
 
   if (!SerialUSB.available()) {
-    SerialUSB.refresh();
     if (!show) return;
-    SerialUSB.write("okay\n");
+    //SerialUSB.write("ok\n");
     strip.show();
     show = false;
     return;
   }
     
   unsigned char c = SerialUSB.read();
+  SerialUSB.write(".");
     
   switch (c) {
 
