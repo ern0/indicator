@@ -106,9 +106,10 @@ x += "8E8"
 x += "AEA"
 x += "DFD"
 
+ser.write("*30")
+
 start = 0
 while True:
-	sys.stderr.write(".")
 	ser.write(":")
 	pos = start
 	for i in range(1,3 * 16):
