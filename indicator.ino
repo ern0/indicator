@@ -28,8 +28,9 @@ void setup() {
 void loop() {
 
   if (!SerialUSB.available()) {
+    SerialUSB.refresh();
     if (!show) return;
-    SerialUSB.write("okay\n");
+    //SerialUSB.write("okay\n");
     strip.show();
     show = false;
     return;
@@ -88,7 +89,7 @@ void loop() {
       strip.setPixelColor(pos,strip.Color(color[0],color[1],color[2]));
       colorIndex = 0;
       pos++;
-        
+
     } break;
 
     case MOD_POS: {
