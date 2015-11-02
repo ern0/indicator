@@ -30,7 +30,7 @@ void loop() {
   if (!SerialUSB.available()) {
     SerialUSB.refresh();
     if (!show) return;
-    //SerialUSB.write("okay\n");
+    SerialUSB.write("okay\n");
     strip.show();
     show = false;
     return;
@@ -86,7 +86,7 @@ void loop() {
       color[colorIndex++] = c | (c << 4);
       if (colorIndex < 3) return;
     
-      strip.setPixelColor(pos,strip.Color(color[0],color[1],color[2]));
+      strip.setPixelColor(pos,color[0],color[1],color[2]);
       colorIndex = 0;
       pos++;
 
