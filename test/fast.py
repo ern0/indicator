@@ -15,7 +15,8 @@ while True:
 	break
 if crlf: sys.stderr.write("\n")
 
-x = "*20:00f-0f0-f00-ccc-aca-877-300-990;"
+x = "*5:c40-c22-c44-c66-66c-44c-22c-04c-0c0-2c2-4c4-6c6-cc6-cc4-cc2-cc4;"
+
 
 for i in range(0,len(x)):
 	ser.write(x[i]);
