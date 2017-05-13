@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 import serial
 import time
 import sys
@@ -6,7 +6,8 @@ import sys
 crlf = False
 while True:
 	try:
-		ser = serial.Serial('/dev/ttyACM0',9600,timeout=2)
+		#ser = serial.Serial('/dev/ttyACM0',9600,timeout=2)
+		ser = serial.Serial('/dev/tty.wchusbserial1410',9600,timeout=2)
 	except:
 		sys.stderr.write(".")
 		crlf = True

@@ -1,10 +1,10 @@
 #include <Adafruit_NeoPixel.h>
-#include <DigiCDC.h>
+///#include <DigiCDC.h>
 
-# define PIXELS 8
-# define PORT 2
+# define PIXELS 128
+# define PIN 13
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, PORT, NEO_GRB | NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB | NEO_KHZ800);
 # define POS_NONE (255)
 unsigned char pos = POS_NONE;
 unsigned char colorIndex = 0;
@@ -21,7 +21,7 @@ unsigned char mod = MOD_IDLE;
 
 void setup() {
 
-  SerialUSB.begin();
+  Serial.begin(38400);
   strip.begin();
   strip.setBrightness(30);
 
@@ -36,7 +36,7 @@ void setup() {
 
 void loop() {
 
-  unsigned char c = SerialUSB.read();
+  unsigned char c = Serial.read();
 
   switch (c) {
 
