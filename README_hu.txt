@@ -1,6 +1,5 @@
 # Indicator
 
-
 ## Ezmiez
 
 ### Cél
@@ -44,17 +43,21 @@ Az eszköz az alábbi portokon szokott megjelenni:
 - Linux: `/dev/ttyUSB0` vagy `/dev/ttyACM0`
 - Mac OS: `/dev/tty.wchusbserial1410`
 
+**Figyelem!** Az eszköz host csatlakozása után resetel, az első parancs kiadása előtt célszerű kb. 1 másodpercet várni! (A csatlakozáskori reset [kiküszöbölhető egy ellenállás beiktatásával](http://playground.arduino.cc/Main/DisablingAutoResetOnSerialConnection).)
+
 ### Parancsok
 
-Az eszköz parancsai karakteres formátumúak, így akár serial terminálból is ki lehet adni őket. Több parancsot egy sorba is lehet írni.
+Az eszköz parancsai karakteres formátumúak, így akár serial terminálból is ki lehet adni őket. Több parancsot egy sorba is lehet írni (kivéve a *sötétség* parancsot).
 
 #### Fényerő: `*` (csillag)
 
 A ledek láthatósága a fényviszonyoktól függ. Ezzel a paranccsal egy általános világosság adható meg. Kezdetnek alacsony értékeket adjunk meg, a WS2812 nagyon fényes.
 
-Példa: `*30` - szoba körülményekhez megfelelő érték. 
+Példa: `*30` - szobai körülményekhez megfelelő érték. 
 
 A parancs a pozíciót 0-ra állítja (lásd *pozíció* parancs).
+
+A parancs a már kigyújtott ledek fényerejét nem változtatja meg, így célszerű a csatlakozáskor azonnal, egyszer kiküldeni.
 
 #### Pozíció: `+` (plusz)
 
@@ -62,7 +65,7 @@ Megadja a következő vezérelni kívánt led számát. Ennek alapértéke 0, í
 
 Példa: 12. led elsötétítése: `+12:000;`
 
-A *fényerő* és a *vége* parancs a pozíciót nullára állítja
+A *fényerő* és a *vége* parancs a pozíciót nullára állítja.
 
 #### Szín: `:` (kettőspont)
 
@@ -79,3 +82,7 @@ Példa: 4 led lekapcsolása: `:000-000-000-000;`
 A *szín* paranccsal megadott értékek csak ennek a parancsnak a hatására lépnek érvénybe. A parancs a pozíció számlálót 0-ra állítja.
 
 Példa: 8. és 12. led fehérre állítása: `+8:fff+12:fff;`
+
+#### Sötétség: `!` (felkiáltójel)
+
+Ez a parancs azonnal kikapcsolja az összes ledet, nem kell *kiküldés* parancs sem utána. A fényerőt nem változtatja meg, viszont a pozíciót nullára állítja.

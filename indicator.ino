@@ -19,17 +19,27 @@ unsigned char brite = 30;
 unsigned char mod = MOD_IDLE;
 
 
+void clear() {
+
+  for (int n = 0; n < PIXELS; n++) strip.setPixelColor(n,0,0,0);
+  strip.show();
+
+  pos = POS_NONE;
+
+} // clear()
+
+
 void setup() {
 
-  Serial.begin(38400);
+  Serial.begin(9600);
   strip.begin();
   strip.setBrightness(30);
 
   for (int n = 0; n < PIXELS; n++) strip.setPixelColor(n,0,0,11);
   strip.show();
-  delay(500);
-  for (int n = 0; n < PIXELS; n++) strip.setPixelColor(n,0,0,0);
-  strip.show();
+  delay(200);
+
+  clear();
 
 } // setup()
 
@@ -37,9 +47,14 @@ void setup() {
 void loop() {
 
   unsigned char c = Serial.read();
-
+  
   switch (c) {
 
+    case '!': {
+        clear();        
+        return;  
+    }
+    
     case '*': {
         mod = MOD_BRITE;
         brite = 0;
@@ -74,7 +89,7 @@ void loop() {
   switch (mod) {
 
     case MOD_DATA: {
-        //if (pos == POS_NONE) return;
+
         if (pos >= PIXELS) return;
 
         bool isDigit = false;

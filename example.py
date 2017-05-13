@@ -1,15 +1,19 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import serial
 import time
 import sys
 
-cmd = '*30:000-f0f-fff-ccc-fff;'
+dev = "/dev/tty.wchusbserial1410"
+
+ser = serial.Serial(
+	dev,9600,
+	timeout=2
+)
 
 crlf = False
 while True:
 	try:
-		#ser = serial.Serial('/dev/ttyACM0',9600,timeout=2)
-		ser = serial.Serial('/dev/tty.wchusbserial1410',38400,timeout=2)
+		ser = serial.Serial(dev,9600,timeout=2)
 	except:
 		sys.stderr.write(".")
 		crlf = True
@@ -18,7 +22,13 @@ while True:
 	break
 if crlf: sys.stderr.write("\n")
 
+time.sleep(2)
+w = 0.5
 
-ser.write(cmd)
-time.sleep(4)
-ser.close()
+ser.write(bytes(b"+0:aff;"))
+time.sleep(w)
+ser.write(bytes(b"+2:f0f;"))
+time.sleep(w)
+
+ser.write(bytes(b"!"))
+
