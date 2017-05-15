@@ -3,6 +3,7 @@
 
 # define PIXELS 128
 # define PIN 13
+# define SIGNATURE "lite\n"
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB | NEO_KHZ800);
 # define POS_NONE (255)
@@ -54,6 +55,13 @@ void loop() {
         clear();        
         return;  
     }
+
+
+    case '?': {
+      Serial.write(SIGNATURE);
+      return; 
+    }
+
     
     case '*': {
         mod = MOD_BRITE;
