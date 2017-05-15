@@ -14,6 +14,7 @@ import serial
 
 
 import config
+import macros
 
 
 class Server():
@@ -31,7 +32,7 @@ class Server():
 
 	def discover(self,hints,signature):
 
-		print("discovery: " + signature)
+		print("discovering device for " + signature)
 
 		for fnam in os.listdir("/dev"):
 
@@ -62,21 +63,34 @@ class Server():
 
 	def startServer(self):
 
-		httpd = socketserver.TCPServer(
-			("",config.port),
-			ServerRequestHandler
-		)
+		warned = False
+		while True:
+			try:
+				httpd = socketserver.TCPServer(
+					("",config.port),
+					ServerRequestHandler
+				)
+				break
+			except OSError:
+				if not warned: 
+					print("waiting for port reuse")
+					warned = True
+				time.sleep(0.5)
+				continue
+
 		httpd.socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 		httpd.theServer = self
-		print("webserver started, port=" + str(config.port))
+		os.chdir(config.webroot)
+		print("webserver started, port=" + str(config.port) + ", root=" + os.getcwd())
 		httpd.serve_forever()
 
 
 	def main(self):
 
-		ser = self.discover(config.ligth,"lite")
+		ser = self.discover(config.light,"lite")
 		if ser is None: return
-		self.light.seral = ser
+		self.light.serial = ser
+
 
 		self.startServer()
 
@@ -107,7 +121,7 @@ class ServerRequestHandler(http.server.SimpleHTTPRequestHandler):
 		self.send_header("Content-type","text/html; charset=utf-8")
 		self.end_headers()
 
-		self.send("light enqueued \n")
+		self.send("macro enqueued \n")
 		self.server.theServer.light.queue.put(macro)
 
 
@@ -118,6 +132,7 @@ class LightProc(threading.Thread):
 
 		threading.Thread.__init__(self);
 		self.queue = queue.Queue()
+		self.queue.put("init")
 		self.start()
 
 
@@ -125,14 +140,47 @@ class LightProc(threading.Thread):
 
 		while True:
 
-			macro = self.queue.get()
+			token = self.queue.get()
 			try:
-				cmd = config.macros[macro]
+				macroFunction = getattr(macros,token)
 			except:
-				print("invalid macro: " + macro)
+				print("invalid macro: " + token)
 				continue
 
-			print(cmd)
+			try:
+				self.cmd = ""
+				result = macroFunction(self)
+			except:
+				print("error in macro " + token,sys.exc_info())
+
+
+	def lum(self,value):
+		self.cmd = self.cmd + "*" + str(value)
+
+
+	def pos(self,value):
+		self.cmd = self.cmd + "+" + str(value)
+
+
+	def rgb(self,colors):
+
+		self.cmd = self.cmd + ":"
+		for color in colors:
+			self.cmd = self.cmd + color
+
+
+	def reset(self):
+		self.send("!")
+
+
+	def send(self,cmd = None):
+
+		if cmd is None: cmd = self.cmd
+		self.serial.write(bytes(cmd,"utf-8"))
+
+
+	def sleep(self,sec):
+		time.sleep(sec)
 
 
 if __name__ == '__main__':

@@ -8,4 +8,4 @@ if [ "$TERM" != "screen" ]; then
 	exit 0
 fi
 
-curl localhost:8080/light/x
+curl localhost:8080/light/one
