@@ -107,7 +107,8 @@ x += "8E8"
 x += "AEA"
 x += "DFD"
 
-ser.write("*30")
+time.sleep(2)
+ser.write("*6;")
 
 start = 0
 while True:
