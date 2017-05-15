@@ -30,6 +30,14 @@ class Server():
 		sys.exit(2)
 
 
+	def changedir(self):
+
+		try:
+			os.chdir(config.webroot)
+		except:
+			self.fatal("invalid webroot: " + config.webroot)
+
+
 	def discover(self,hints,signature):
 
 		print("discovering device for " + signature)
@@ -80,17 +88,17 @@ class Server():
 
 		httpd.socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 		httpd.theServer = self
-		os.chdir(config.webroot)
 		print("webserver started, port=" + str(config.port) + ", root=" + os.getcwd())
 		httpd.serve_forever()
 
 
 	def main(self):
 
+		self.changedir()
+
 		ser = self.discover(config.light,"lite")
 		if ser is None: return
 		self.light.serial = ser
-
 
 		self.startServer()
 
@@ -162,7 +170,10 @@ class LightProc(threading.Thread):
 		self.cmd = self.cmd + "+" + str(value)
 
 
-	def rgb(self,colors):
+	def hex(self,colors):
+
+		if not type(colors) is list:
+			colors = [colors]
 
 		self.cmd = self.cmd + ":"
 		for color in colors:
@@ -171,12 +182,14 @@ class LightProc(threading.Thread):
 
 	def reset(self):
 		self.send("!")
+		self.sleep(0.1)
 
 
 	def send(self,cmd = None):
 
-		if cmd is None: cmd = self.cmd
+		if cmd is None: cmd = self.cmd + ";"
 		self.serial.write(bytes(cmd,"utf-8"))
+		self.cmd = ""
 
 
 	def sleep(self,sec):

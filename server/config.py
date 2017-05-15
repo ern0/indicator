@@ -1,3 +1,3 @@
 port = 8080
-webroot = "."
+webroot = "client"
 light = ["tty.","ttyUSB","ttyACM","null"]
