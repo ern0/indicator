@@ -86,6 +86,8 @@ class Server():
 				time.sleep(0.5)
 				continue
 
+		self.light.start()
+
 		httpd.socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 		httpd.theServer = self
 		print("webserver started, port=" + str(config.port) + ", root=" + os.getcwd())
@@ -141,7 +143,6 @@ class LightProc(threading.Thread):
 		threading.Thread.__init__(self);
 		self.queue = queue.Queue()
 		self.queue.put("init")
-		self.start()
 
 
 	def run(self):
@@ -160,6 +161,8 @@ class LightProc(threading.Thread):
 				result = macroFunction(self)
 			except:
 				print("error in macro " + token,sys.exc_info())
+
+			if self.cmd != "": self.send()
 
 
 	def lum(self,value):
