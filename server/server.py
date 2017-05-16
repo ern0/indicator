@@ -196,6 +196,7 @@ class LightProc(threading.Thread):
 
 
 	def sleep(self,sec):
+		self.send()
 		time.sleep(sec)
 
 
