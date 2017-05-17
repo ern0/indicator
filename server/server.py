@@ -11,6 +11,7 @@ import threading
 import queue
 from subprocess import Popen,PIPE
 import serial
+import pygame
 
 
 import config
@@ -22,7 +23,7 @@ class Server():
 	def __init__(self):
 		
 		threading.Thread.__init__(self)
-		self.light = LightProc()
+		self.api = MacroApi()
 
 
 	def fatal(self,msg):
@@ -40,7 +41,7 @@ class Server():
 
 	def discover(self,hints,signature):
 
-		print("discovering device for " + signature)
+		print("scanning for device, signature=\"" + signature + "\"")
 
 		for fnam in os.listdir("/dev"):
 
@@ -62,7 +63,7 @@ class Server():
 			reply = ser.read(99).decode("utf-8")
 			if reply[0:len(signature)] != signature: continue
 
-			print("found /dev/" + fnam)
+			print("found device=/dev/" + fnam)
 			return ser
 
 		print("not found")
@@ -86,7 +87,8 @@ class Server():
 				time.sleep(0.5)
 				continue
 
-		self.light.start()
+		self.api.initAudio()
+		self.api.start()
 
 		httpd.socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 		httpd.theServer = self
@@ -100,7 +102,7 @@ class Server():
 
 		ser = self.discover(config.light,"lite")
 		if ser is None: return
-		self.light.serial = ser
+		self.api.serial = ser
 
 		self.startServer()
 
@@ -132,17 +134,32 @@ class ServerRequestHandler(http.server.SimpleHTTPRequestHandler):
 		self.end_headers()
 
 		self.send("macro enqueued \n")
-		self.server.theServer.light.queue.put(macro)
+		self.server.theServer.api.queue.put(macro)
 
 
-class LightProc(threading.Thread):
+class MacroApi(threading.Thread):
 
 
 	def __init__(self):
-
 		threading.Thread.__init__(self);
+		self.initQueue();
+
+
+	def initQueue(self):
 		self.queue = queue.Queue()
 		self.queue.put("init")
+
+
+	def initAudio(self):
+
+		self.sounds = {}
+		pygame.mixer.init()
+		num = 0
+		for fnam in os.listdir("../sound"):
+			self.sounds[fnam] = pygame.mixer.Sound("../sound/" + fnam)
+			num += 1
+
+		print("audio ok, files=" + str(num))
 
 
 	def run(self):
@@ -193,11 +210,38 @@ class LightProc(threading.Thread):
 		if cmd is None: cmd = self.cmd + ";"
 		self.serial.write(bytes(cmd,"utf-8"))
 		self.cmd = ""
+		time.sleep(0.1)
 
 
 	def sleep(self,sec):
 		self.send()
 		time.sleep(sec)
+
+
+	def findSound(self,pattern):
+		
+		for name in self.sounds:
+			if not pattern in name: continue
+			return self.sounds[name]
+
+		print("no sound file found: " + pattern)
+		return None
+
+
+	def bgplay(self,pattern,wait=False):
+
+		self.send()
+		sound = self.findSound(pattern)
+		if sound is None: return
+
+		sound.play()
+
+		if not wait: return
+		while pygame.mixer.get_busy(): time.sleep(0.1)
+
+
+	def fgplay(self,pattern):
+		self.bgplay(pattern,True)
 
 
 if __name__ == '__main__':

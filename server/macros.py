@@ -1,30 +1,38 @@
 
-def init(light):
-	light.lum(30)
+
+def init(api):
+	api.lum(100)
+	api.pos(2)
+	api.hex("fff")
+	api.send()
+	api.fgplay("261")
+	api.pos(2)
+	api.hex("000")
 
 
-def reset(light):
-	light.reset()
+def reset(api):
+	api.reset()
 
 
-def one(light):
+def one(api):
 
 	for i in range(0,5):
-		light.pos(i * 8)
-		light.hex(["0e0","0e0","0e0"])
-		light.sleep(0.5)
-		light.reset()
+		api.pos(i * 8)
+		api.hex(["0e0","0e0","0e0"])
+		api.sleep(0.5)
+		api.reset()
 
 
-def red(light):
-	light.pos(22)
-	light.hex("700")
+def red(api):
+	api.pos(22)
+	api.hex("700")
+	api.bgplay("kwah")
 
 
-def yellow(light):
-	light.pos(22)
-	light.hex("770")
+def yellow(api):
+	api.pos(22)
+	api.hex("770")
 
-def green(light):
-	light.pos(22)
-	light.hex("070")
+def green(api):
+	api.pos(22)
+	api.hex("070")
