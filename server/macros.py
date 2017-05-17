@@ -1,4 +1,6 @@
 def init(self):
+
+	self.reset()
 	self.lum(100)
 
 	self.konyha = [22,25,39]

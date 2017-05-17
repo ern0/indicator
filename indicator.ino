@@ -20,9 +20,9 @@ unsigned char brite = 30;
 unsigned char mod = MOD_IDLE;
 
 
-void clear() {
+void clear(int r,int g,int b) {
 
-  for (int n = 0; n < PIXELS; n++) strip.setPixelColor(n,0,0,0);
+  for (int n = 0; n < PIXELS; n++) strip.setPixelColor(n,r,g,b);
   strip.show();
 
   pos = POS_NONE;
@@ -36,11 +36,7 @@ void setup() {
   strip.begin();
   strip.setBrightness(30);
 
-  for (int n = 0; n < PIXELS; n++) strip.setPixelColor(n,0,0,11);
-  strip.show();
-  delay(200);
-
-  clear();
+  clear(0xff,0xff,0xff);
 
 } // setup()
 
@@ -52,7 +48,7 @@ void loop() {
   switch (c) {
 
     case '!': {
-        clear();        
+        clear(0,0,0);        
         return;  
     }
 
