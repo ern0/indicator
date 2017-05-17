@@ -1,38 +1,33 @@
+def init(self):
+	self.lum(100)
+
+	self.konyha = [22,25,39]
+	self.piros = "f00"
+
+	self.fgplay("kwah")
 
 
-def init(api):
-	api.lum(100)
-	api.pos(2)
-	api.hex("fff")
-	api.send()
-	api.fgplay("261")
-	api.pos(2)
-	api.hex("000")
+def reset(self):
+	self.reset()
 
 
-def reset(api):
-	api.reset()
+def one(self):
 
-
-def one(api):
-
+	self.reset()
 	for i in range(0,5):
-		api.pos(i * 8)
-		api.hex(["0e0","0e0","0e0"])
-		api.sleep(0.5)
-		api.reset()
+		self.light(i * 8,["0e0","0e0","0e0"])
+		self.sleep(0.5)
+		self.reset()
 
 
-def red(api):
-	api.pos(22)
-	api.hex("700")
-	api.bgplay("kwah")
+def red(self):
+	self.light(self.konyha,self.piros)
+	self.bgplay("kwah")
 
 
-def yellow(api):
-	api.pos(22)
-	api.hex("770")
+def yellow(self):
+	self.light(self.konyha,"770")
 
-def green(api):
-	api.pos(22)
-	api.hex("070")
+
+def green(self):
+	self.light(self.konyha,"070")

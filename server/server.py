@@ -155,8 +155,9 @@ class MacroApi(threading.Thread):
 		self.sounds = {}
 		pygame.mixer.init()
 		num = 0
-		for fnam in os.listdir("../sound"):
-			self.sounds[fnam] = pygame.mixer.Sound("../sound/" + fnam)
+		for fnam in os.listdir("../" + config.sound):
+			full = "../" + config.sound + "/" + fnam
+			self.sounds[fnam] = pygame.mixer.Sound(full)
 			num += 1
 
 		print("audio ok, files=" + str(num))
@@ -200,9 +201,18 @@ class MacroApi(threading.Thread):
 			self.cmd = self.cmd + color
 
 
+	def light(self,positions,value):
+		
+		if not type(positions) is list:
+			positions = [positions]
+
+		for position in positions:
+			self.pos(position)
+			self.hex(value)
+
+
 	def reset(self):
 		self.send("!")
-		self.sleep(0.1)
 
 
 	def send(self,cmd = None):
