@@ -6,6 +6,8 @@ def init(self):
 
 	self.fgplay("kwah")
 
+	self.light([0,7,32,38],["00f","00f"])
+
 
 def reset(self):
 	self.reset()
