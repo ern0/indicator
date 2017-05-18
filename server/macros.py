@@ -1,37 +1,40 @@
-def init(self):
-
-	self.reset()
-	self.lum(100)
-
-	self.konyha = [22,25,39]
-	self.piros = "f00"
-
-	self.fgplay("kwah")
-
-	self.light([0,7,32,38],["00f","00f"])
+class Macros:
 
 
-def reset(self):
-	self.reset()
+	def init(self):
+
+		self.api.reset()
+		self.api.lum(100)
+
+		self.konyha = [22,25,39]
+		self.piros = "f00"
+
+		self.api.fgplay("kwah")
+
+		self.api.light([0,7,32,38],["00f","00f"])
 
 
-def one(self):
-
-	self.reset()
-	for i in range(0,5):
-		self.light(i * 8,["0e0","0e0","0e0"])
-		self.sleep(0.5)
-		self.reset()
+	def reset(self):
+		self.api.reset()
 
 
-def red(self):
-	self.light(self.konyha,self.piros)
-	self.bgplay("kwah")
+	def one(self):
+
+		self.api.reset()
+		for i in range(0,5):
+			self.api.light(i * 8,["0e0","0e0","0e0"])
+			self.api.sleep(0.5)
+			self.api.reset()
 
 
-def yellow(self):
-	self.light(self.konyha,"770")
+	def red(self):
+		self.api.light(self.konyha,self.piros)
+		self.api.bgplay("kwah")
 
 
-def green(self):
-	self.light(self.konyha,"070")
+	def yellow(self):
+		self.api.light(self.konyha,"770")
+
+
+	def green(self):
+		self.api.light(self.konyha,"070")

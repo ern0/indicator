@@ -143,6 +143,8 @@ class MacroApi(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self);
 		self.initQueue();
+		self.macros = macros.Macros()
+		self.macros.api = self
 
 
 	def initQueue(self):
@@ -154,9 +156,15 @@ class MacroApi(threading.Thread):
 
 		self.sounds = {}
 		pygame.mixer.init()
+
+		if config.sound[0] == "/":
+			sdir = config.sound
+		else:
+			sdir = "../" + config.sound
+
 		num = 0
-		for fnam in os.listdir("../" + config.sound):
-			full = "../" + config.sound + "/" + fnam
+		for fnam in os.listdir(sdir):
+			full = sdir + "/" + fnam
 			self.sounds[fnam] = pygame.mixer.Sound(full)
 			num += 1
 
@@ -165,11 +173,12 @@ class MacroApi(threading.Thread):
 
 	def run(self):
 
+		self.macros.init()
 		while True:
 
 			token = self.queue.get()
 			try:
-				macroFunction = getattr(macros,token)
+				macroFunction = getattr(macros.Macros[token])
 			except:
 				print("invalid macro: " + token)
 				continue
