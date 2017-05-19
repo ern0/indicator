@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+import config
+import macros
+
 import sys
 import os
 import time
@@ -10,12 +13,10 @@ import urllib
 import threading
 import queue
 from subprocess import Popen,PIPE
-import serial
-import pygame
-
-
-import config
-import macros
+if not config.test_disable_light:
+	import serial
+if not config.test_disable_sound:
+	import pygame
 
 
 class Server():
@@ -100,9 +101,12 @@ class Server():
 
 		self.changedir()
 
-		ser = self.discover(config.light,"lite")
-		if ser is None: return
-		self.api.serial = ser
+		if config.test_disable_light:
+			print("lights are disabled")
+		else:
+			ser = self.discover(config.light,"lite")
+			if ser is None: return
+			self.api.serial = ser
 
 		self.startServer()
 
@@ -154,6 +158,10 @@ class MacroApi(threading.Thread):
 
 	def initAudio(self):
 
+		if config.test_disable_sound:
+			print("audio is disabled")
+			return
+			
 		self.sounds = {}
 		pygame.mixer.init()
 
@@ -227,7 +235,10 @@ class MacroApi(threading.Thread):
 	def send(self,cmd = None):
 
 		if cmd is None: cmd = self.cmd + ";"
-		self.serial.write(bytes(cmd,"utf-8"))
+		if config.test_disable_light:
+			print("light cmd=\"" + cmd + "\"");
+		else:
+			self.serial.write(bytes(cmd,"utf-8"))
 		self.cmd = ""
 		time.sleep(0.1)
 
@@ -238,6 +249,8 @@ class MacroApi(threading.Thread):
 
 
 	def findSound(self,pattern):
+		
+		if config.test_disable_sound: return None
 		
 		for name in self.sounds:
 			if not pattern in name: continue
