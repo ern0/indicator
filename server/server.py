@@ -76,7 +76,7 @@ class Server():
 		warned = False
 		while True:
 			try:
-				httpd = socketserver.TCPServer(
+				self.httpd = socketserver.TCPServer(
 					("",config.port),
 					ServerRequestHandler
 				)
@@ -91,10 +91,9 @@ class Server():
 		self.api.initAudio()
 		self.api.start()
 
-		httpd.socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-		httpd.theServer = self
+		self.httpd.theServer = self
 		print("webserver started, port=" + str(config.port) + ", root=" + os.getcwd())
-		httpd.serve_forever()
+		self.httpd.serve_forever()
 
 
 	def main(self):
@@ -110,6 +109,10 @@ class Server():
 
 		self.startServer()
 
+
+	def cleanup(self):
+		self.httpd.server_close()
+		
 
 class ServerRequestHandler(http.server.SimpleHTTPRequestHandler):
 
@@ -181,21 +184,21 @@ class MacroApi(threading.Thread):
 
 	def run(self):
 
-		self.macros.init()
 		while True:
 
-			token = self.queue.get()
+			self.token = self.queue.get()
+
 			try:
-				macroFunction = getattr(macros.Macros[token])
+				macroFunction = getattr(self.macros,self.token)
 			except:
-				print("invalid macro: " + token)
+				print("[" + self.token + "] error: missing macro")
 				continue
 
 			try:
 				self.cmd = ""
-				result = macroFunction(self)
+				result = macroFunction()
 			except:
-				print("error in macro " + token,sys.exc_info())
+				print("[" + self.token + "] error: " + sys.exc_info())
 
 			if self.cmd != "": self.send()
 
@@ -236,7 +239,7 @@ class MacroApi(threading.Thread):
 
 		if cmd is None: cmd = self.cmd + ";"
 		if config.test_disable_light:
-			print("light cmd=\"" + cmd + "\"");
+			print("[" + self.token + "] light: " + cmd);
 		else:
 			self.serial.write(bytes(cmd,"utf-8"))
 		self.cmd = ""
@@ -250,7 +253,9 @@ class MacroApi(threading.Thread):
 
 	def findSound(self,pattern):
 		
-		if config.test_disable_sound: return None
+		if config.test_disable_sound: 
+			print("[" + self.token + "] sound: " + pattern);
+			return None
 		
 		for name in self.sounds:
 			if not pattern in name: continue
@@ -277,4 +282,9 @@ class MacroApi(threading.Thread):
 
 
 if __name__ == '__main__':
-	(Server()).main()
+	server = Server()
+	try: server.main()
+	except KeyboardInterrupt:
+		server.cleanup()
+		print("\rshutdown")
+		os._exit(0)
