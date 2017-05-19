@@ -23,7 +23,7 @@ class Server():
 	
 	def __init__(self):
 		
-		threading.Thread.__init__(self)
+		threading.Thread.__init__(self)	
 		self.api = MacroApi()
 
 
@@ -37,12 +37,12 @@ class Server():
 		try:
 			os.chdir(config.webroot)
 		except:
-			self.fatal("invalid webroot: " + config.webroot)
+			self.api.log("invalid webroot: " + config.webroot,"startup")
 
 
 	def discover(self,hints,signature):
 
-		print("scanning for device, signature=\"" + signature + "\"")
+		self.api.log("scanning for device, signature=\"" + signature + "\"","startup")
 
 		for fnam in os.listdir("/dev"):
 
@@ -64,10 +64,10 @@ class Server():
 			reply = ser.read(99).decode("utf-8")
 			if reply[0:len(signature)] != signature: continue
 
-			print("found device=/dev/" + fnam)
+			self.api.log("found device=/dev/" + fnam,"startup")
 			return ser
 
-		print("not found")
+		self.api.log("not found","startup")
 		return None
 
 
@@ -83,7 +83,7 @@ class Server():
 				break
 			except OSError:
 				if not warned: 
-					print("waiting for port reuse")
+					self.api.log("waiting for port reuse","startup")
 					warned = True
 				time.sleep(0.5)
 				continue
@@ -92,7 +92,7 @@ class Server():
 		self.api.start()
 
 		self.httpd.theServer = self
-		print("webserver started, port=" + str(config.port) + ", root=" + os.getcwd())
+		self.api.log("webserver started, port=" + str(config.port) + ", root=" + os.getcwd(),"startup")
 		self.httpd.serve_forever()
 
 
@@ -101,7 +101,7 @@ class Server():
 		self.changedir()
 
 		if config.test_disable_light:
-			print("lights are disabled")
+			self.api.log("lights are disabled","startup")
 		else:
 			ser = self.discover(config.light,"lite")
 			if ser is None: return
@@ -154,6 +154,27 @@ class MacroApi(threading.Thread):
 		self.macros.api = self
 
 
+	def log(self,msg,sig = None):
+				
+		if sig == None:
+			if config.test_logging:
+				b = "["
+				e = "] "
+				sig = self.token
+			else:
+				return
+		else:
+			if config.test_logging:
+				b = "("
+				e = ") "	
+			else:
+				b = ""
+				e = ""
+				sig = ""
+		
+		print(b + sig + e + msg)
+		
+
 	def initQueue(self):
 		self.queue = queue.Queue()
 		self.queue.put("init")
@@ -162,7 +183,7 @@ class MacroApi(threading.Thread):
 	def initAudio(self):
 
 		if config.test_disable_sound:
-			print("audio is disabled")
+			self.log("audio is disabled","startup")
 			return
 			
 		self.sounds = {}
@@ -179,7 +200,7 @@ class MacroApi(threading.Thread):
 			self.sounds[fnam] = pygame.mixer.Sound(full)
 			num += 1
 
-		print("audio ok, files=" + str(num))
+		self.log("audio ok, files=" + str(num),"startup")
 
 
 	def run(self):
@@ -191,16 +212,20 @@ class MacroApi(threading.Thread):
 			try:
 				macroFunction = getattr(self.macros,self.token)
 			except:
-				print("[" + self.token + "] error: missing macro")
+				self.log("error: missing macro","commproc")
 				continue
 
 			try:
 				self.cmd = ""
+				self.log(">>>> begin")
 				result = macroFunction()
 			except:
-				print("[" + self.token + "] error: " + sys.exc_info())
+				selg.log("<<<< error: " + sys.exc_info())
+				self.cmd = ""
+				continue
 
 			if self.cmd != "": self.send()
+			self.log("<<<< end")
 
 
 	def lum(self,value):
@@ -238,9 +263,8 @@ class MacroApi(threading.Thread):
 	def send(self,cmd = None):
 
 		if cmd is None: cmd = self.cmd + ";"
-		if config.test_disable_light:
-			print("[" + self.token + "] light: " + cmd);
-		else:
+		self.log("light: " + cmd);
+		if not config.test_disable_light:
 			self.serial.write(bytes(cmd,"utf-8"))
 		self.cmd = ""
 		time.sleep(0.1)
@@ -252,16 +276,18 @@ class MacroApi(threading.Thread):
 
 
 	def findSound(self,pattern):
-		
+
+	
 		if config.test_disable_sound: 
-			print("[" + self.token + "] sound: " + pattern);
+			self.log("sound: " + pattern + " (disabled)");			
 			return None
 		
 		for name in self.sounds:
 			if not pattern in name: continue
+			self.log("sound: " + pattern);			
 			return self.sounds[name]
 
-		print("no sound file found: " + pattern)
+		self.log("no sound file found: " + pattern)
 		return None
 
 
@@ -286,5 +312,5 @@ if __name__ == '__main__':
 	try: server.main()
 	except KeyboardInterrupt:
 		server.cleanup()
-		print("\rshutdown")
+		print("\r(cleanup) aborted")
 		os._exit(0)
