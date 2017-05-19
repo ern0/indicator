@@ -85,3 +85,59 @@ body {
 	background: #888888;
 	color: #ffffff;
 }
+
+.tab {
+	height: 85%;
+	width: 100%;
+}
+.cell {
+	text-align: center;
+	vertical-align: middle;
+  user-select: none;
+}
+.cellactive {
+	background: #aabbbb;
+}
+.table {
+	height: 100%;
+	width: 100%;
+}
+
+.t1row {
+	height: 33.33%;
+}
+.t1cell {
+	width: 20%;
+}
+.t1pep1 {
+	background: #eeeeff;
+}
+.t1pep2 {
+	background: #eeffee;
+}
+
+.t2row {
+	height: 33.33%;
+}
+.t2cell {
+	width: 20%;
+}
+.t2pep1 {
+	background: #aaeeff;
+}
+.t2pep2 {
+	background: #aaffee;
+}
+
+.t3row {
+	height: 33.33%;
+}
+.t3cell {
+	width: 20%;
+}
+.t3pep1 {
+	background: #ffeecc;
+}
+.t3pep2 {
+	background: #ffccee;
+}

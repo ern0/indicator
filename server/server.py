@@ -127,7 +127,7 @@ class ServerRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 	def do_GET(self):
 
-		sp = str(self.path).split("/")
+		sp = str(self.path + "//").split("/")
 		if sp[1] == "light": 
 			self.procMacro(sp[2],sp[3])
 		else:
@@ -210,7 +210,7 @@ class MacroApi(threading.Thread):
 			q = self.queue.get()
 			self.token = q[0]
 			try: self.parm = q[1]
-			except: self.parm = None
+			except: self.parm = ""
 
 			try:
 				macroFunction = getattr(self.macros,self.token)
@@ -221,7 +221,7 @@ class MacroApi(threading.Thread):
 			try:
 				self.cmd = ""
 				self.log(">>>> begin")
-				if self.parm is None: result = macroFunction()
+				if self.parm == "": result = macroFunction()
 				else: result = macroFunction(self.parm)
 			except:
 				self.log("<<<< error: " + str(sys.exc_info()))
