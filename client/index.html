@@ -5,47 +5,58 @@
 		<script src="script.js"></script>
 	</head>	
 	<body>
+
 		<div id="screen">
 			
-			<div id="tabarea">
-				
-				<div class="tab" id="tab1">
-					<a href="/light/reset">reset</a> <br />
-					<a href="/light/color/f00">red</a> <br />
-					<a href="/light/color/ff0">yellow</a> <br />
-					<a href="/light/color/0f0">green</a> <br />
-					<a href="/light/one">anim</a> <br />					
-				</div>
-				
-				<div class="tab" id="tab2">
-					tab2
-				</div>
-				
-				<div class="tab" id="tab3">
-					tab3
-				</tab>
-				
-			</div>
-			
-			<div id="tabselector">
-				
-				<div id="tab1">
-					<a href="#" onclick="activateTab(1);"> 1 </a>
-				</div>
-				<div id="tab2">
-					<a href="#" onclick="activateTab(2);"> 2 </a>
-				</div>
-				<div id="tab3">
-					<a href="#" onclick="activateTab(3);"> 3 </a>
-				</div>
-				
-				<div id="status">
-					na, mi
-				</div>
-				
-			</div>
-		
-		
-		</div>
+				<div id="tabarea">
+					
+					<div id="tab1" class="tab">
+						<a href="/light/reset">reset</a> <br />
+						<a href="/light/color/f00">red</a> <br />
+						<a href="/light/color/ff0">yellow</a> <br />
+						<a href="/light/color/0f0">green</a> <br />
+						<a href="/light/one">anim</a> <br />
+					</div>
+
+					<div id="tab2" class="tab">
+						tab2
+					</div>
+
+					<div id="tab3" class="tab">
+						tab3
+					</div>
+
+				</div><!-- tabarea -->
+
+				<div id="bottomline">
+
+					<div id="tabselbox">
+						<div id="tabsel1" class="tabsel tabsel1">
+							<div class="label">
+								1
+							</div>
+						</div>
+						<div id="tabsel2" class="tabsel tabsel2">
+							<div class="label">
+								2
+							</div>
+						</div>
+						<div id="tabsel3" class="tabsel tabsel3">
+							<div class="label">
+								3
+							</div>
+						</div>
+					</div>
+
+					<div id="statusbox">
+						<div class="label">
+							hello
+						</div>
+					</div>
+
+				</div><!-- bottomline -->
+
+			</div>				
+
 	</body>
 </html>
