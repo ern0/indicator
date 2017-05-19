@@ -1,28 +1,50 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="style.css">
-		<script src="jquery-3.1.1.min.js"></script>
+		<script src="jquery-3.2.1.min.js"></script>
 		<script src="script.js"></script>
 	</head>	
 	<body>
 		<div id="screen">
 			
-			<div id="tabselector">
-				<div id="tab1">
+			<div id="tabarea">
+				
+				<div class="tab" id="tab1">
+					<a href="/light/reset">reset</a> <br />
+					<a href="/light/color/f00">red</a> <br />
+					<a href="/light/color/ff0">yellow</a> <br />
+					<a href="/light/color/0f0">green</a> <br />
+					<a href="/light/one">anim</a> <br />					
 				</div>
-				<div id="tab2">
+				
+				<div class="tab" id="tab2">
+					tab2
 				</div>
-				<div id="tab3">
-				</div>
-				<div id="status">
-				</div>
+				
+				<div class="tab" id="tab3">
+					tab3
+				</tab>
+				
 			</div>
 			
-			<a href="/light/reset">reset</a> <br />
-			<a href="/light/color/f00">red</a> <br />
-			<a href="/light/color/ff0">yellow</a> <br />
-			<a href="/light/color/0f0">green</a> <br />
-			<a href="/light/one">anim</a> <br />
+			<div id="tabselector">
+				
+				<div id="tab1">
+					<a href="#" onclick="activateTab(1);"> 1 </a>
+				</div>
+				<div id="tab2">
+					<a href="#" onclick="activateTab(2);"> 2 </a>
+				</div>
+				<div id="tab3">
+					<a href="#" onclick="activateTab(3);"> 3 </a>
+				</div>
+				
+				<div id="status">
+					na, mi
+				</div>
+				
+			</div>
+		
 		
 		</div>
 	</body>

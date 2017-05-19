@@ -5,6 +5,10 @@ body {
 	background: #444444;
 }
 
+.tab {
+	display: none;
+}
+
 #screen {
 	width: 800px;
 	height: 480px;
