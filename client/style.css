@@ -59,6 +59,22 @@ body {
 .tabsel3active {
 	background: #cc88aa;
 }
+.tabind {
+	position: relative;
+	top: 0px;
+	height: 5px;
+	width: 100%;
+	background: #eeeeee;
+}
+.tabind1active {
+	background: #446655;
+}
+.tabind2active {
+	background: #554466;
+}
+.tabind3active {
+	background: #665544;
+}
 
 #statusbox {
 	position: absolute;

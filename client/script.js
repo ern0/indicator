@@ -20,5 +20,7 @@
 
 		$(".tab").hide();
 		$("#tab" + id).show();
+		$(".tabind").removeClass("tabind1active tabind2active tabind3active")
+		$("#tabind" + id).addClass("tabind" + id + "active");
 
 	} // activateTab()
