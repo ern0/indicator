@@ -129,19 +129,19 @@ class ServerRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 		sp = str(self.path).split("/")
 		if sp[1] == "light": 
-			self.procMacro(sp[2])
+			self.procMacro(sp[2],sp[3])
 		else:
 			http.server.SimpleHTTPRequestHandler.do_GET(self)
 
 
-	def procMacro(self,macro):
+	def procMacro(self,macro,parm):
 
 		self.send_response(200)
 		self.send_header("Content-type","text/html; charset=utf-8")
 		self.end_headers()
 
 		self.send("macro enqueued \n")
-		self.server.theServer.api.queue.put(macro)
+		self.server.theServer.api.queue.put([macro,parm])
 
 
 class MacroApi(threading.Thread):
@@ -177,7 +177,7 @@ class MacroApi(threading.Thread):
 
 	def initQueue(self):
 		self.queue = queue.Queue()
-		self.queue.put("init")
+		self.queue.put(["init"])
 
 
 	def initAudio(self):
@@ -207,20 +207,24 @@ class MacroApi(threading.Thread):
 
 		while True:
 
-			self.token = self.queue.get()
+			q = self.queue.get()
+			self.token = q[0]
+			try: self.parm = q[1]
+			except: self.parm = None
 
 			try:
 				macroFunction = getattr(self.macros,self.token)
 			except:
-				self.log("error: missing macro","commproc")
+				self.log("error: missing macro: " + self.token,"commproc")
 				continue
 
 			try:
 				self.cmd = ""
 				self.log(">>>> begin")
-				result = macroFunction()
+				if self.parm is None: result = macroFunction()
+				else: result = macroFunction(self.parm)
 			except:
-				selg.log("<<<< error: " + sys.exc_info())
+				self.log("<<<< error: " + str(sys.exc_info()))
 				self.cmd = ""
 				continue
 
@@ -276,7 +280,6 @@ class MacroApi(threading.Thread):
 
 
 	def findSound(self,pattern):
-
 	
 		if config.test_disable_sound: 
 			self.log("sound: " + pattern + " (disabled)");			

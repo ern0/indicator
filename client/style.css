@@ -1,0 +1,13 @@
+body {
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: #444444;
+}
+
+#screen {
+	width: 800px;
+	height: 480px;
+	background: #ffffff;
+	margin: auto;
+}

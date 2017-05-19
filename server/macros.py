@@ -27,6 +27,10 @@ class Macros:
 			self.api.reset()
 
 
+	def color(self,color):
+		self.api.light(self.konyha,color)
+		
+
 	def red(self):
 		self.api.light(self.konyha,self.piros)
 		self.api.bgplay("kwah")
