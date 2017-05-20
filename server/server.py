@@ -25,6 +25,7 @@ class Server():
 		
 		threading.Thread.__init__(self)	
 		self.api = MacroApi()
+		self.timer = Timer()
 
 
 	def fatal(self,msg):
@@ -91,6 +92,8 @@ class Server():
 		self.api.initAudio()
 		self.api.start()
 
+		self.timer.start()
+
 		self.httpd.theServer = self
 		self.api.log("webserver started, port=" + str(config.port) + ", root=" + os.getcwd(),"startup")
 		self.httpd.serve_forever()
@@ -111,7 +114,8 @@ class Server():
 
 
 	def cleanup(self):
-		self.httpd.server_close()
+		try: self.httpd.server_close()
+		except: pass
 		
 
 class ServerRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -127,9 +131,11 @@ class ServerRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 	def do_GET(self):
 
-		sp = str(self.path + "//").split("/")
+		sp = str(self.path + "///").split("/")
 		if sp[1] == "light": 
 			self.procMacro(sp[2],sp[3])
+		elif sp[1] == "clock":
+			self.procClock(sp[2],sp[3])
 		else:
 			http.server.SimpleHTTPRequestHandler.do_GET(self)
 
@@ -144,12 +150,105 @@ class ServerRequestHandler(http.server.SimpleHTTPRequestHandler):
 		self.server.theServer.api.queue.put([macro,parm])
 
 
-class MacroApi(threading.Thread):
+	def procClock(self,h,m):
 
+		self.send_response(200)
+		self.send_header("Content-type","text/html; charset=utf-8")
+		self.end_headers()
+
+		if h != "": 
+			result = self.server.theServer.timer.set(h,m)
+		else:
+			result = self.server.theServer.timer.get()
+
+		self.send(result)
+
+
+class Timer(threading.Thread):
 
 	def __init__(self):
-		threading.Thread.__init__(self);
-		self.initQueue();
+		threading.Thread.__init__(self)
+
+		self.hour = config.start_hour
+		self.min = config.start_min
+		self.running = False
+
+		self.clockLock = threading.Lock()
+
+
+	def log(self,msg):
+		if not config.test_logging: return
+		print("(timer) " + msg)
+
+
+	def mkReply(self,h,m):
+		return str(h) + "/" + str(m) + "/\n"
+
+
+	def set(self,h,m):
+
+		self.running = True
+
+		h = int(h)
+		m = int(m)
+
+		self.clockLock.acquire()
+		self.hour = h
+		self.min = m
+		self.clockLock.release()
+
+		self.log("time set, stamp=" + self.getStamp())
+
+		return self.mkReply(h,m)
+
+
+	def get(self):
+
+		self.running = True
+
+		self.clockLock.acquire()
+		h = self.hour
+		m = self.min
+		self.clockLock.release()
+
+		return self.mkReply(h,m)
+
+
+	def getStamp(self):
+
+		h = str(self.hour)
+		if self.hour < 10: h = "0" + h
+		m = str(self.min)
+		if self.min < 10: m = "0" + m
+
+		return h + ":" + m
+
+
+	def run(self):
+
+		while not self.running:
+			time.sleep(1)
+
+		self.log("started, stamp=" + self.getStamp() + ", minute=" + str(config.minute))
+
+		while True:
+			time.sleep(config.minute)
+			self.clockLock.acquire()
+
+			self.min += 1
+			if self.min == 60:
+				self.min = 0
+				self.hour += 1
+				if self.hour == 24: self.hour = 0
+
+			self.clockLock.release()
+
+
+class MacroApi(threading.Thread):
+
+	def __init__(self):
+		threading.Thread.__init__(self)
+		self.initQueue()
 		self.macros = macros.Macros()
 		self.macros.api = self
 
@@ -270,7 +369,7 @@ class MacroApi(threading.Thread):
 	def send(self,cmd = None):
 
 		if cmd is None: cmd = self.cmd + ";"
-		self.log("light: " + cmd);
+		self.log("light: " + cmd)
 		if not config.test_disable_light:
 			self.serial.write(bytes(cmd,"utf-8"))
 		self.cmd = ""
@@ -285,12 +384,12 @@ class MacroApi(threading.Thread):
 	def findSound(self,pattern):
 	
 		if config.test_disable_sound: 
-			self.log("sound: " + pattern + " (disabled)");			
+			self.log("sound: " + pattern + " (disabled)")			
 			return None
 		
 		for name in self.sounds:
 			if not pattern in name: continue
-			self.log("sound: " + pattern);			
+			self.log("sound: " + pattern)			
 			return self.sounds[name]
 
 		self.log("no sound file found: " + pattern)

@@ -5,20 +5,15 @@
 		// kezdeti aktív tab száma
 		initTab = 1;
 		
-		// induláskori játékbeli idő
-		initHour = 11;
-		initMin = 55;
-
 		// óra beállításnál perc léptetési egység
 		minStep = 15;
-
-		// ennyi valós másodperc alatt telik el egy játékbeli perc
-		tick = 2;
 
 		/*---------------------------------------------------------*/
 
 		clockTimeout = null;
-		initClock(initHour,initMin);
+		reqHour = "";
+		reqMin = "";
+		fetchClock();
 		actualTab = 0;
 		activateTab(initTab);
 
@@ -98,24 +93,6 @@
 	} // paintClock()
 
 
-	function reportClock() {
-		var c = formatClock("");
-		macro("/light/clock/" + c);
-	} // reportClock()
-
-
-	function initClock(h,m) {
-
-		if (clockTimeout != null) clearTimeout(clockTimeout);
-
-		clockHour = h;
-		clockMin = m;
-
-		updateClock();
-
-	} // initClock()
-
-
 	function clickClock() {
 
 		setHour = clockHour;
@@ -191,34 +168,39 @@
 
 
 	function clockSetOkay() {
-		initClock(setHour,setMin);
+
+		reqHour = setHour;
+		clockHour = setHour;
+		reqMin = setMin;
+		clockMin = setMin;
+
 		clockSetBack();
+
 	} // clockSetOkay()
 
 
-	function tickClock() {
-		incClock();
-		updateClock();
-	} // tickClock()
+	function fetchClock() {
+
+		$.ajax(
+			"/clock/" + reqHour + "/" + reqMin
+		).done(function(resp) {
+
+			var r = resp.split("/");
+			clockHour = r[0];
+			clockMin = r[1];
+			paintClock();
+
+			setTimeout(fetchClock,1000);
+
+		}).fail(function() {
+
+			setTimeout(fetchClock,2000);
+
+		});
+
+		reqHour = "";
+		reqMin = "";
+
+	} // fetchClock()
 
 
-	function incClock() {
-
-		clockMin++;
-		if (clockMin == 60) {
-			clockMin = 0;
-			clockHour++;
-			if (clockHour == 24) clockHour = 0;
-		}
-
-	} // incClock()
-
-
-	function updateClock() {
-
-		paintClock();
-		reportClock();
-
-		clockTimeout = setTimeout(tickClock,tick * 1000);
-
-	} // tickClock()
