@@ -147,3 +147,18 @@ body {
 .t3pep2 {
 	background: #ffccee;
 }
+
+.t4row1 {	height: 20%; }
+.t4row2 {	height: 20%; }
+.t4row3 {	height: 20%; }
+.t4row4 {	height: 20%; }
+.t4row5 {	height: 20%; }
+
+.t4col1 { width: 35%; }
+.t4col2 { width: 12%; }
+.t4col3 { width: 6%; }
+.t4col4 { width: 12%; }
+.t4col5 { width: 35%; }
+
+.t4cell {
+}
