@@ -59,6 +59,19 @@ body {
 .tabsel3active {
 	background: #cc88aa;
 }
+.tabsel4 {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	width: 16%;
+	height: 100%;
+	background: #888888;
+	color: #ffffff;
+}
+.tabsel4active {
+	background: #777777;
+}
+
 .tabind {
 	position: relative;
 	top: 0px;
@@ -67,23 +80,16 @@ body {
 	background: #eeeeee;
 }
 .tabind1active {
-	background: #446655;
+	background: #448855;
 }
 .tabind2active {
-	background: #554466;
+	background: #554488;
 }
 .tabind3active {
-	background: #665544;
+	background: #885544;
 }
-
-#statusbox {
-	position: absolute;
-	bottom: 0px;
-	right: 0px;
-	width: 16%;
-	height: 100%;
-	background: #888888;
-	color: #ffffff;
+.tabind4active {
+	background: #555555;
 }
 
 .tab {

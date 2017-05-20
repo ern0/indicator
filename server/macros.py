@@ -18,6 +18,10 @@ class Macros:
 		self.api.reset()
 
 
+	def clock(self,t):
+		print(t)
+		
+
 	def one(self):
 
 		self.api.reset()
