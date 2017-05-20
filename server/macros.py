@@ -19,8 +19,20 @@ class Macros:
 
 
 	def clock(self,t):
-		print(t)
-		
+		hour = int(t[0:2])
+		minute = int(t[2:4])
+		number = (hour * 100) + minute
+
+		if number == 700: print("ebreszto")
+		if number == 730: print("nyomas az iskolaba")
+		if number == 800: print("becsengettek")
+		if number == 2000: print("nyomas az agyba")
+		if number == 0: print("ejfel")
+
+		if 1200 <= number and number < 1204: 
+			if minute % 2 == 0: print("bim")
+			else: print("bam")
+
 
 	def one(self):
 

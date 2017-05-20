@@ -1,8 +1,26 @@
 	$(document).ready(function() {
 		
-		initClock(6,0);
+		/*---------------------------------------------------------*/
+
+		// kezdeti aktív tab száma
+		initTab = 1;
+		
+		// induláskori játékbeli idő
+		initHour = 11;
+		initMin = 55;
+
+		// óra beállításnál perc léptetési egység
+		minStep = 15;
+
+		// ennyi valós másodperc alatt telik el egy játékbeli perc
+		tick = 2;
+
+		/*---------------------------------------------------------*/
+
+		clockTimeout = null;
+		initClock(initHour,initMin);
 		actualTab = 0;
-		activateTab(1);
+		activateTab(initTab);
 
 		$(".tabsel").click(function() {
 			var id = $(this).attr("id");
@@ -62,14 +80,15 @@
 	} // macro()
 
 
+	function formatNum(num) {
+		var result = "" + num;
+		if (result < 10) result = "0" + result;
+		return result;
+	} // formatNum()
+
+
 	function formatClock(sepa) {
-
-		var h = "" + clockHour;
-		if (clockHour < 10) h = "0" + h;
-		var m = "" + clockMin;
-		if (clockMin < 10) m = "0" + m;
-
-		return (h + sepa + m);
+		return (formatNum(clockHour) + sepa + formatNum(clockMin));
 	} // formatClock()
 
 
@@ -87,11 +106,12 @@
 
 	function initClock(h,m) {
 
+		if (clockTimeout != null) clearTimeout(clockTimeout);
+
 		clockHour = h;
 		clockMin = m;
 
-		paintClock();
-		reportClock();
+		updateClock();
 
 	} // initClock()
 
@@ -101,4 +121,104 @@
 		setHour = clockHour;
 		setMin = clockMin;
 
+		clockSetPaint();
+
 	} // clickClock()
+
+
+	function clockSetPaint() {
+		$(".clocksethour").html( formatNum(setHour) );
+		$(".clocksetmin").html( formatNum(setMin) );
+	} // clockSetPaint()
+
+
+	function clockSetHourPlus() {
+		
+		setHour++;
+		if (setHour > 23) setHour = 0;
+		
+		clockSetPaint();
+
+	} // clockSetHourPlus()
+
+
+	function clockSetHourMinus() {
+		
+		--setHour;
+		if (setHour < 0) setHour = 23;
+
+		clockSetPaint();
+
+	} // clockSetHourMinus()
+
+
+	function clockSetMinPlus() {
+
+		setMin = setMin - (setMin % minStep)
+		setMin += minStep;
+		if (setMin > 59) {
+			setMin = 0;
+			clockSetHourPlus();
+			return;
+		}
+
+		clockSetPaint();
+		
+	} // cloxkSetMinPlus()
+
+
+	function clockSetMinMinus() {
+
+		if (setMin % minStep == 0) {
+			setMin -= minStep;
+		} else {
+			setMin = setMin - (setMin % minStep)
+		}
+		if (setMin < 0) {
+			setMin = 60 - minStep;
+			clockSetHourMinus();
+			return;
+		}
+
+		clockSetPaint();
+
+	} // clockSetMinMinus()
+
+
+	function clockSetBack() {
+		activateTab(lastTab);
+	} // clockSetBack()
+
+
+	function clockSetOkay() {
+		initClock(setHour,setMin);
+		clockSetBack();
+	} // clockSetOkay()
+
+
+	function tickClock() {
+		incClock();
+		updateClock();
+	} // tickClock()
+
+
+	function incClock() {
+
+		clockMin++;
+		if (clockMin == 60) {
+			clockMin = 0;
+			clockHour++;
+			if (clockHour == 24) clockHour = 0;
+		}
+
+	} // incClock()
+
+
+	function updateClock() {
+
+		paintClock();
+		reportClock();
+
+		clockTimeout = setTimeout(tickClock,tick * 1000);
+
+	} // tickClock()

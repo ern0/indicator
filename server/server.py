@@ -160,10 +160,13 @@ class MacroApi(threading.Thread):
 			if config.test_logging:
 				b = "["
 				e = "] "
+				if self.parm == "": p = ""
+				else: p = self.parm + " "
 				sig = self.token
 			else:
 				return
 		else:
+			p = ""
 			if config.test_logging:
 				b = "("
 				e = ") "	
@@ -172,7 +175,7 @@ class MacroApi(threading.Thread):
 				e = ""
 				sig = ""
 		
-		print(b + sig + e + msg)
+		print(b + sig + e  + p + msg)
 		
 
 	def initQueue(self):
