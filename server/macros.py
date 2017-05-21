@@ -18,10 +18,7 @@ class Macros:
 		self.api.reset()
 
 
-	def clock(self,t):
-		hour = int(t[0:2])
-		minute = int(t[2:4])
-		number = (hour * 100) + minute
+	def napirend(self,number):
 
 		if number == 700: print("ebreszto")
 		if number == 730: print("nyomas az iskolaba")
@@ -29,9 +26,28 @@ class Macros:
 		if number == 2000: print("nyomas az agyba")
 		if number == 0: print("ejfel")
 
-		if 1200 <= number and number < 1204: 
+
+	def harang(self,number,minute):
+		if 1200 <= number and number <= 1203: 
 			if minute % 2 == 0: print("bim")
 			else: print("bam")
+
+
+	def kakukk(self,hour,minute):
+		if minute == 0:
+			if hour in [7,8,9,10,11,13,14,15,16,17,18,19,20]:
+				print("kakukk")		
+
+
+	def clock(self,stamp):
+		(hour,minute) = stamp.split(":")
+		hour = int(hour)
+		minute = int(minute)
+		number = (hour * 100) + minute
+
+		self.napirend(number)
+		self.harang(number,minute)
+		self.kakukk(hour,minute)
 
 
 	def one(self):

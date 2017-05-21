@@ -26,6 +26,7 @@ class Server():
 		threading.Thread.__init__(self)	
 		self.api = MacroApi()
 		self.timer = Timer()
+		self.timer.api = self.api
 
 
 	def fatal(self,msg):
@@ -226,14 +227,21 @@ class Timer(threading.Thread):
 
 	def run(self):
 
-		while not self.running:
+		for i in range(1,4):
+			if self.running: break
 			time.sleep(1)
-
+		if not self.running: 
+			self.log("waiting for first client")
+		while not self.running: 
+			time.sleep(1)
 		self.log("started, stamp=" + self.getStamp() + ", minute=" + str(config.minute))
 
 		while True:
 			time.sleep(config.minute)
+
 			self.clockLock.acquire()
+
+			self.api.queue.put(["clock",self.getStamp()])
 
 			self.min += 1
 			if self.min == 60:
