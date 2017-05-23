@@ -8,5 +8,5 @@ start_min = 00
 minute = 2
 
 test_disable_light = True
-test_disable_sound = True
+test_disable_sound = False
 test_logging = True
