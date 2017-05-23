@@ -10,14 +10,11 @@ serverurl="http://localhost:8080/"
 timermsec=100
 clkpozscale=0.24
 clksizescale=0.9
-strAM="AM"
-strPM="PM"
 class Clock(QtGui.QWidget):
     def __init__(self, parent=None):
         super(Clock, self).__init__(parent)
         #self.msecdiff=0
         self.lastCmd=""
-        self.speed=0
         self.tik=QtCore.QTime.currentTime()
         #self.ts=self.tik
         #timer
@@ -31,11 +28,6 @@ class Clock(QtGui.QWidget):
         #self.resize(800, 700)
         self.resize(800, 480)
         #tabs
-        '''
-        tabs=QtGui.QTabWidget()
-        tab1=QtGui.QWidget()
-        tab2=QtGui.QWidget()
-        '''
         #hour pointer
         self.hPointer = QtGui.QPolygon([
             QtCore.QPoint(6, 7),
@@ -67,15 +59,6 @@ class Clock(QtGui.QWidget):
         self.hhmm.setText("00:00")
         self.hhmm.move(self.width()*clkpozscale-65,422)
         self.hhmm.setFont(QtGui.QFont("Fixed",30,QtGui.QFont.Bold))
-        #buttons
-        #btnreset = QtGui.QPushButton("Reset", self)
-        #btnreset.clicked.connect(lambda: self.handleBtn("Reset"))
-        btnfaster = QtGui.QPushButton("Faster", self)
-        btnfaster.clicked.connect(lambda: self.handleBtn("Faster"))
-        btnfaster.move(100,0)
-        btnslower = QtGui.QPushButton("Slower", self)
-        btnslower.clicked.connect(lambda: self.handleBtn("Slower"))
-        btnslower.move(200,0)
         #api buttons
         btn1=QtGui.QPushButton("btn1", self)
         btn1.clicked.connect(lambda: self.handleBtn("btn1"))
@@ -95,36 +78,20 @@ class Clock(QtGui.QWidget):
         btn6=QtGui.QPushButton("btn6", self)
         btn6.clicked.connect(lambda: self.handleBtn("btn6"))
         btn6.move(500,450)
-        #self.btnampm=QtGui.QLabel(self,"ampm")
-        self.btnampm=QtGui.QPushButton("ampm",self)
-        self.btnampm.move(0,30)
-        self.btnampm.clicked.connect(self.handleAmpm)
 
-    def handleAmpm(self,x):
+    def handleAmpm(self):
         self.tik=self.tik.addSecs(12*3600)
         print self.tik
 
     def handleBtn(self,btnname):
         if btnname=="Reset":
             self.tik=QtCore.QTime.currentTime()
-            self.speed=0
-        elif btnname == "Faster":
-            self.speed=min(self.speed+1,8)
-            print "speed",self.speed
-        elif btnname == "Slower":
-            self.speed=max(self.speed-1,0)
-            print "speed",self.speed
         elif btnname == "btn1":
             self.ajaxCall(apicall["btn1"],False)
         elif btnname == "btn2":
             self.ajaxCall(apicall["btn2"],False)
         elif btnname == "btn3":
             self.ajaxCall(apicall["btn3"],False)
-        """
-        elif btnname == "":
-        elif btnname == "":
-        print _
-        """
 
     def mousePressEvent(self, event):
         if type(event) == QtGui.QMouseEvent:
@@ -143,23 +110,18 @@ class Clock(QtGui.QWidget):
                     ti=(ti-minu)*60
                     sec=int(ti)
                     msec=int((ti-sec)*1000)
-                    if self.btnampm.text()==strPM: hour+=12
+                    if self.tik.hour()>=12: hour+=12
                     self.tik.setHMS(hour,minu,sec,msec)
-                    #ct=QtCore.QTime.currentTime()
-                    #self.msecdiff=((((hour-ct.hour())*60)+minu-ct.minute())*60+sec-ct.second())*1000+msec-ct.msec()
                     print hour,minu,sec,msec
                 elif distforigo<20:
                     self.handleBtn("Reset")
-                elif x>74 and x<113 and y>425 and y<453:
-                    self.handleBtn("Slower")
-                elif x>259 and x<298 and y>425 and y<453:
-                    self.handleBtn("Faster")
+                elif x>129 and x<252 and y>428 and y<457:
+                    self.handleAmpm()
                 print "click:",x,y,distforigo
 
     def paintEvent(self, event):
         rec = min(self.width(), self.height())
-        #self.tik = self.ts.addMSecs(self.ts.msecsTo(QtCore.QTime.currentTime())*self.speed+self.msecdiff)
-        self.tik = self.tik.addMSecs(timermsec*2**self.speed)
+        self.tik = self.tik.addMSecs(timermsec*60)
         #if self.tik.msec()<100: print self.tik
         #painter
         painter = QtGui.QPainter(self)
@@ -179,8 +141,6 @@ class Clock(QtGui.QWidget):
         drawPointer(self.bColor, (30 * (self.tik.hour() + self.tik.minute() / 60.0)), self.hPointer)
         drawPointer(self.bColor, (6 * (self.tik.minute() + self.tik.second() / 60.0)), self.mPointer)
         drawPointer(self.sColor, (6 * self.tik.second()), self.sPointer)
-        ampm=strPM if self.tik.hour()>=12 else strAM
-        self.btnampm.setText(ampm)
         #display time
         self.hhmm.setText("{:02}:{:02}".format(self.tik.hour(),self.tik.minute()))
         #draw face
