@@ -10,10 +10,13 @@ serverurl="http://localhost:8080/"
 timermsec=100
 clkpozscale=0.24
 clksizescale=0.9
+strAM="AM"
+strPM="PM"
 class Clock(QtGui.QWidget):
     def __init__(self, parent=None):
         super(Clock, self).__init__(parent)
         #self.msecdiff=0
+        self.lastCmd=""
         self.speed=0
         self.tik=QtCore.QTime.currentTime()
         #self.ts=self.tik
@@ -104,23 +107,20 @@ class Clock(QtGui.QWidget):
 
     def handleBtn(self,btnname):
         if btnname=="Reset":
-            #self.msecdiff = 0
             self.tik=QtCore.QTime.currentTime()
             self.speed=0
         elif btnname == "Faster":
             self.speed=min(self.speed+1,8)
-            #self.ts = self.tik
             print "speed",self.speed
         elif btnname == "Slower":
             self.speed=max(self.speed-1,0)
-            #self.ts = self.tik
             print "speed",self.speed
         elif btnname == "btn1":
-            print urllib.urlopen(serverurl + apicall["btn1"]).read()
+            self.ajaxCall(apicall["btn1"],False)
         elif btnname == "btn2":
-            print urllib.urlopen(serverurl + apicall["btn2"]).read()
+            self.ajaxCall(apicall["btn2"],False)
         elif btnname == "btn3":
-            print urllib.urlopen(serverurl + apicall["btn3"]).read()
+            self.ajaxCall(apicall["btn3"],False)
         """
         elif btnname == "":
         elif btnname == "":
@@ -144,6 +144,7 @@ class Clock(QtGui.QWidget):
                     ti=(ti-minu)*60
                     sec=int(ti)
                     msec=int((ti-sec)*1000)
+                    if self.btnampm.text()==strPM: hour+=12
                     self.tik.setHMS(hour,minu,sec,msec)
                     #ct=QtCore.QTime.currentTime()
                     #self.msecdiff=((((hour-ct.hour())*60)+minu-ct.minute())*60+sec-ct.second())*1000+msec-ct.msec()
@@ -173,7 +174,7 @@ class Clock(QtGui.QWidget):
         drawPointer(self.bColor, (30 * (self.tik.hour() + self.tik.minute() / 60.0)), self.hPointer)
         drawPointer(self.bColor, (6 * (self.tik.minute() + self.tik.second() / 60.0)), self.mPointer)
         drawPointer(self.sColor, (6 * self.tik.second()), self.sPointer)
-        ampm="PM" if self.tik.hour()>=12 else "AM"
+        ampm=strPM if self.tik.hour()>=12 else strAM
         self.btnampm.setText(ampm)
         #display time
         self.hhmm.setText("{:02}:{:02}".format(self.tik.hour(),self.tik.minute()))
@@ -185,7 +186,7 @@ class Clock(QtGui.QWidget):
             else:
                 painter.drawLine(77*clksizescale, 0, 97*clksizescale, 0)
             painter.rotate(6)
-        if self.cnt>=100:  #100 -> 100*100msec = 10sec
+        if self.cnt>=5:  #5 -> 5*100msec = 0.5sec
             self.checkSchedule(self.tik.hour(),self.tik.minute())
             self.cnt=0
         else:
@@ -199,8 +200,13 @@ class Clock(QtGui.QWidget):
                 res=i
                 break
         if res==-1: res=list(sorted(sched,reverse=True))[0]
-        print res,sched[res]
-        #print urllib.urlopen(serverurl + sched[i]).read()
+        self.ajaxCall(sched[res],True)
+
+    def ajaxCall(self,cmd,remember):
+        if cmd!=self.lastCmd:
+            #print urllib.urlopen(serverurl + cmd).read()
+            print cmd
+            if remember: self.lastCmd=cmd
 
 if __name__ == '__main__':
     app = QtGui.QApplication(argv)
