@@ -205,6 +205,6 @@ class Clock(QtGui.QWidget):
 if __name__ == '__main__':
     app = QtGui.QApplication(argv)
     win = Clock()
-    #win.showFullScreen()
+    if fullscreen: win.showFullScreen()
     win.show()
     exit(app.exec_())

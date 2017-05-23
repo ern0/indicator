@@ -12,3 +12,4 @@ sched = {
     2100: "2100",
     2300: "2300"
 }
+fullscreen=True
