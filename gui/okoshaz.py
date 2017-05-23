@@ -65,12 +65,11 @@ class Clock(QtGui.QWidget):
         #current time label
         self.hhmm=QtGui.QLabel(self)
         self.hhmm.setText("00:00")
-        self.hhmm.move(self.width()*clkpozscale-38,130)
-        self.hhmm.setFont(QtGui.QFont("Fixed",20))
+        self.hhmm.move(self.width()*clkpozscale-65,422)
+        self.hhmm.setFont(QtGui.QFont("Fixed",30,QtGui.QFont.Bold))
         #buttons
-        btnreset = QtGui.QPushButton("Reset", self)
-        #btnreset.setStyleSheet('QPushButton {background-color: #5361ff; color: red;}')
-        btnreset.clicked.connect(lambda: self.handleBtn("Reset"))
+        #btnreset = QtGui.QPushButton("Reset", self)
+        #btnreset.clicked.connect(lambda: self.handleBtn("Reset"))
         btnfaster = QtGui.QPushButton("Faster", self)
         btnfaster.clicked.connect(lambda: self.handleBtn("Faster"))
         btnfaster.move(100,0)
@@ -149,6 +148,12 @@ class Clock(QtGui.QWidget):
                     #ct=QtCore.QTime.currentTime()
                     #self.msecdiff=((((hour-ct.hour())*60)+minu-ct.minute())*60+sec-ct.second())*1000+msec-ct.msec()
                     print hour,minu,sec,msec
+                elif distforigo<20:
+                    self.handleBtn("Reset")
+                elif x>74 and x<113 and y>425 and y<453:
+                    self.handleBtn("Slower")
+                elif x>259 and x<298 and y>425 and y<453:
+                    self.handleBtn("Faster")
                 print "click:",x,y,distforigo
 
     def paintEvent(self, event):
