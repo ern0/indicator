@@ -24,7 +24,11 @@ class Clock(QtGui.QWidget):
       self.setWindowIcon(QtGui.QIcon('Default.png'))
       self.setWindowTitle('Clock')
       #self.resize(800, 700)
-      self.resize(1200, 700)
+      self.resize(800, 480)
+      #tabs
+      tabs=QtGui.QTabWidget()
+      tab1=QtGui.QWidget()
+      tab2=QtGui.QWidget()
       #hour pointer
       self.hPointer = QtGui.QPolygon([
          QtCore.QPoint(6, 7),
