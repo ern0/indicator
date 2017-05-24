@@ -1,7 +1,8 @@
 apicall = {
     "bathroom": "light/one",
     "livingroom": "light/color/f00",
-    "garage": "light/red"
+    "garage": "light/red",
+    "rainbow": "light/rainbow"
 }
 sched = {
     730:  "ajax730",

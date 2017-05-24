@@ -41,13 +41,15 @@ class Clock(QtGui.QWidget):
             QtCore.QPoint(0, -70)
         ])
         #second pointer
+        """
         self.sPointer = QtGui.QPolygon([
             QtCore.QPoint(1, 1),
             QtCore.QPoint(-1, 1),
             QtCore.QPoint(0, -90)
         ])
+        """
         #colors
-        self.bColor = QtGui.QColor('#0000aa') #hours and minutes
+        self.bColor = QtGui.QColor('#00e0e0') #hours and minutes
         self.sColor = QtGui.QColor('#aa0087')
         #image
         pic=QtGui.QLabel(self)
@@ -59,6 +61,7 @@ class Clock(QtGui.QWidget):
         self.hhmm.setText("00:00")
         self.hhmm.move(self.width()*clkpozscale-65,422)
         self.hhmm.setFont(QtGui.QFont("Fixed",30,QtGui.QFont.Bold))
+        self.hhmm.setStyleSheet("QLabel {color : #00e0e0;}")
         #api buttons
         garage=QtGui.QPushButton("", self)
         garage.setIcon(QtGui.QIcon("switch_off.png"))
@@ -128,6 +131,8 @@ class Clock(QtGui.QWidget):
                     self.handleBtn(False,"Reset")
                 elif x>129 and x<252 and y>428 and y<457:
                     self.handleAmpm()
+                elif (x-760)**2+(y-67)**2<400:
+                    self.handleBtn(False,"rainbow")
                 print "click:",x,y,distforigo
 
     def paintEvent(self, event):
@@ -151,11 +156,11 @@ class Clock(QtGui.QWidget):
         #draw pointers
         drawPointer(self.bColor, (30 * (self.tik.hour() + self.tik.minute() / 60.0)), self.hPointer)
         drawPointer(self.bColor, (6 * (self.tik.minute() + self.tik.second() / 60.0)), self.mPointer)
-        drawPointer(self.sColor, (6 * self.tik.second()), self.sPointer)
+        #drawPointer(self.sColor, (6 * self.tik.second()), self.sPointer)
         #display time
         self.hhmm.setText("{:02}:{:02}".format(self.tik.hour(),self.tik.minute()))
         #draw face
-        painter.setPen(QtGui.QPen(self.bColor))
+        painter.setPen(QtGui.QPen(self.bColor,2))
         for i in range(0, 60):
             if (i % 5) != 0:
                 painter.drawLine(87*clksizescale, 0, 97*clksizescale, 0)
@@ -187,6 +192,7 @@ class Clock(QtGui.QWidget):
 if __name__ == '__main__':
     app = QtGui.QApplication(argv)
     win = Clock()
+    win.setStyleSheet("QWidget{ background-color: black; }")
     if fullscreen: win.showFullScreen()
     win.show()
     exit(app.exec_())
