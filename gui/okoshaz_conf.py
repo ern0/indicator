@@ -1,7 +1,7 @@
 apicall = {
-    "btn1": "light/one",
-    "btn2": "light/color/f00",
-    "btn3": "light/red"
+    "bathroom": "light/one",
+    "livingroom": "light/color/f00",
+    "garage": "light/red"
 }
 sched = {
     730:  "ajax730",
@@ -12,4 +12,4 @@ sched = {
     2100: "ajax2100",
     2300: "ajax2300"
 }
-fullscreen=True
+fullscreen=False

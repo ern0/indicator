@@ -60,38 +60,49 @@ class Clock(QtGui.QWidget):
         self.hhmm.move(self.width()*clkpozscale-65,422)
         self.hhmm.setFont(QtGui.QFont("Fixed",30,QtGui.QFont.Bold))
         #api buttons
-        btn1=QtGui.QPushButton("btn1", self)
-        btn1.clicked.connect(lambda: self.handleBtn("btn1"))
-        btn1.move(475,135)
-        btn2=QtGui.QPushButton("btn2", self)
-        btn2.clicked.connect(lambda: self.handleBtn("btn2"))
-        btn2.move(647,129)
-        btn3=QtGui.QPushButton("btn3", self)
-        btn3.clicked.connect(lambda: self.handleBtn("btn3"))
-        btn3.move(645,281)
-        btn4=QtGui.QPushButton("btn4", self)
-        btn4.clicked.connect(lambda: self.handleBtn("btn4"))
-        btn4.move(424,340)
-        btn5=QtGui.QPushButton("btn5", self)
-        btn5.clicked.connect(lambda: self.handleBtn("btn5"))
-        btn5.move(400,450)
-        btn6=QtGui.QPushButton("btn6", self)
-        btn6.clicked.connect(lambda: self.handleBtn("btn6"))
-        btn6.move(500,450)
+        garage=QtGui.QPushButton("", self)
+        garage.setIcon(QtGui.QIcon("switch_off.png"))
+        garage.setIconSize(QtCore.QSize(48,48))
+        garage.clicked.connect(lambda: self.handleBtn(garage,"garage"))
+        garage.move(470,130)
+        garage.setCheckable(True)
+        telly=QtGui.QPushButton("", self)
+        telly.setIcon(QtGui.QIcon("telly.png"))
+        telly.setIconSize(QtCore.QSize(64,64))
+        telly.clicked.connect(self.handleTelly)
+        telly.move(517,326)
+        telly.setCheckable(True)
+        livingroom=QtGui.QPushButton("", self)
+        livingroom.setIcon(QtGui.QIcon("switch_off.png"))
+        livingroom.setIconSize(QtCore.QSize(48,48))
+        livingroom.clicked.connect(lambda: self.handleBtn(livingroom,"livingroom"))
+        livingroom.move(645,281)
+        livingroom.setCheckable(True)
+        bathroom=QtGui.QPushButton("", self)
+        bathroom.clicked.connect(lambda: self.handleBtn(bathroom,"bathroom"))
+        bathroom.setIcon(QtGui.QIcon("switch_off.png"))
+        bathroom.setIconSize(QtCore.QSize(32,32))
+        bathroom.move(420,340)
+        bathroom.setCheckable(True)
 
     def handleAmpm(self):
         self.tik=self.tik.addSecs(12*3600)
         print self.tik
 
-    def handleBtn(self,btnname):
+    def handleTelly(self):
+        print "telly"
+        #self.ajaxCall(apicall["telly"],False)
+
+    def handleBtn(self,obj,btnname):
+        if obj:
+            if obj.isChecked():
+                obj.setIcon(QtGui.QIcon("switch_on.png"))
+            else:
+                obj.setIcon(QtGui.QIcon("switch_off.png"))
         if btnname=="Reset":
             self.tik=QtCore.QTime.currentTime()
-        elif btnname == "btn1":
-            self.ajaxCall(apicall["btn1"],False)
-        elif btnname == "btn2":
-            self.ajaxCall(apicall["btn2"],False)
-        elif btnname == "btn3":
-            self.ajaxCall(apicall["btn3"],False)
+        else:
+            self.ajaxCall(apicall[btnname],False)
 
     def mousePressEvent(self, event):
         if type(event) == QtGui.QMouseEvent:
@@ -114,7 +125,7 @@ class Clock(QtGui.QWidget):
                     self.tik.setHMS(hour,minu,sec,msec)
                     print hour,minu,sec,msec
                 elif distforigo<20:
-                    self.handleBtn("Reset")
+                    self.handleBtn(False,"Reset")
                 elif x>129 and x<252 and y>428 and y<457:
                     self.handleAmpm()
                 print "click:",x,y,distforigo
