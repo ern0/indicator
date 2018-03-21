@@ -1,14 +1,10 @@
+import os
 
-def checkPs(self,pattern):
+
+def checkPs(pattern):
 
 	r = os.popen(
-		"ps -ef | grep " + pattern + "| grep -v grep"
+		"ps -e -o ucomm | cut -d' ' -f1 | grep '^" + pattern + "$'"
 	).read()
 	
-	return r > 0
-
-
-def tst(self,parm):
-	print("[" + str(parm) + "]")
-	return self.tick
-
+	return len(r) > 0

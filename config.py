@@ -1,13 +1,13 @@
 import modules
 
+
 cfg = [
 
 	{
 		"slot": 0,
-		"func": modules.tst,
-		"parm": True,
+		"func": modules.checkPs,
+		"parm": "cat",
 		"freq": 4,
-		"phase": 0,
 		"low": "000",
 		"rise": "444",
 		"high": "f00",
@@ -17,15 +17,39 @@ cfg = [
 
 	{
 		"slot": 0,
-		"func": modules.tst,
-		"parm": False,
+		"func": modules.checkPs,
+		"parm": "tail",
 		"freq": 4,
 		"phase": 2,
-		"low": [ 0,0,0 ],
-		"rise": [ 44,44,44 ],
-		"high": [ 255,0,0 ],
-		"fall": [ 44,44,44 ],
+		"low": "000",
+		"rise": "444",
+		"high": "f00",
+		"fall": "444",
 		"sust": 3,
-	}
+	},
+
+	{
+		"slot": 1,
+		"func": modules.checkPs,
+		"parm": "cat",
+		"freq": 1,
+		"low": "000",
+		"rise": "444",
+		"high": "f00",
+		"fall": "444",
+		"sust": 3,
+	},
+
+	{
+		"slot": 2,
+		"func": modules.checkPs,
+		"parm": "tail",
+		"freq": 1,
+		"low": "000",
+		"rise": "444",
+		"high": "f00",
+		"fall": "444",
+		"sust": 3,
+	},
 
 ]
