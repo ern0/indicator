@@ -58,6 +58,7 @@ class Indicator:
 
 	def main(self):
 
+		print("Indicator... ")
 		self.connect()
 		self.loadConfig()
 		self.run()
@@ -140,8 +141,12 @@ class Indicator:
 
 
 if __name__ == '__main__':
+
 	app = Indicator()
 	try: app.main()
 	except KeyboardInterrupt:
-		print("\r - aborted")
-		os._exit(0)
+		app.send("!")
+		print("\r- aborted")
+	except serial.serialutil.SerialException:
+		print("\r- disconnected")
+	os._exit(0)
