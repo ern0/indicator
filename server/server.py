@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-import config
-import macros
-
 import sys
+sys.dont_write_bytecode = True
+
 import os
 import time
 import http.server
@@ -13,6 +12,10 @@ import urllib
 import threading
 import queue
 from subprocess import Popen,PIPE
+
+import config
+import macros
+
 if not config.test_disable_light:
 	import serial
 if not config.test_disable_sound:
