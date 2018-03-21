@@ -1,8 +1,7 @@
 #/bin/bash
 clear
 
-server/server.py
-exit
+#server/server.py ;  exit
 
 if [ "$TERM" != "screen" ]; then
 	tmux new -d -s server "server/server.py ; sleep 9999"
