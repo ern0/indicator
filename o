@@ -1,0 +1,6 @@
+#!/bin/bash
+clear
+
+pio lib install 28
+#pio run -e arduino ; exit
+pio run -t upload -e arduino

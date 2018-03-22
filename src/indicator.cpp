@@ -1,22 +1,16 @@
+# include "indicator.hpp"
 #include <Adafruit_NeoPixel.h>
+
 ///#include <DigiCDC.h>
 
-# define PIXELS 128
-# define PIN 13
-# define SIGNATURE "lite\n"
-
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB | NEO_KHZ800);
-# define POS_NONE (255)
+
 unsigned char pos = POS_NONE;
 unsigned char colorIndex = 0;
 unsigned char color[3];
 bool posReset = true;
 unsigned char brite = 30;
 
-# define MOD_IDLE (0)
-# define MOD_BRITE (1)
-# define MOD_POS (2)
-# define MOD_DATA (3)
 unsigned char mod = MOD_IDLE;
 
 
