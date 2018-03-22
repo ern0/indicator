@@ -5,51 +5,35 @@ cfg = [
 
 	{
 		"slot": 0,
-		"func": modules.checkPs,
+		"module": modules.CheckPs,
 		"parm": "cat",
 		"freq": 4,
-		"low": "000",
-		"rise": "444",
-		"high": "f00",
-		"fall": "500",
-		"sust": 3,
+		"colors": ["100","f00"]
 	},
 
 	{
 		"slot": 0,
-		"func": modules.checkPs,
+		"module": modules.CheckPs,
 		"parm": "tail",
 		"freq": 4,
 		"phase": 2,
-		"low": "000",
-		"rise": "444",
-		"high": "f00",
-		"fall": "444",
-		"sust": 3,
+		"colors": ["001","00f"]
 	},
 
 	{
 		"slot": 1,
-		"func": modules.checkPs,
+		"module": modules.CheckPs,
 		"parm": "cat",
 		"freq": 1,
-		"low": "000",
-		"rise": "444",
-		"high": "f00",
-		"fall": "444",
-		"sust": 3,
+		"colors": ["100","f00"]
 	},
 
 	{
 		"slot": 2,
-		"func": modules.checkPs,
+		"module": modules.CheckPs,
 		"parm": "tail",
 		"freq": 1,
-		"low": "000",
-		"rise": "444",
-		"high": "f00",
-		"fall": "444",
-		"sust": 3,
+		"colors": ["001","00f"]
 	},
 
 ]

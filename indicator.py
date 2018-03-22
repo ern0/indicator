@@ -9,18 +9,17 @@ import serial
 import config
 
 
-class Item:
+class Module:
 
 
-	def init(self,config,numero):
+	def init(self,numero,config):
 
-		self.cfg = config
 		self.numero = numero
+		self.config = config
+		self.result = 0
 
-		try: self.counter = self.cfg["phase"]
+		try: self.counter = self.config["phase"]
 		except KeyError: self.counter = 0
-
-		self.result = False
 
 
 	def tick(self):
@@ -28,29 +27,22 @@ class Item:
 		active = False
 
 		if self.counter == 0: 
-			self.result = self.check()
-			active = True
+			chk = self.check()
+			if chk is not None: 
+				self.result = chk
+				active = True
 
 		self.counter += 1
-		if self.counter >= self.cfg["freq"]: 
+		if self.counter >= self.config["freq"]: 
 			self.counter = 0
 
 		return active
 
 
-	def check(self):
-
-		func = self.cfg["func"]
-		try: parm = self.cfg["parm"]
-		except KeyError: parm = None
-
-		return func(parm)
-
-
 	def color(self):
 
-		if self.result: return "fff"
-		else: return "000"
+		color = self.config["colors"][self.result]
+		return color
 
 
 class Indicator:
@@ -58,7 +50,6 @@ class Indicator:
 
 	def main(self):
 
-		print("Indicator... ")
 		self.connect()
 		self.loadConfig()
 		self.run()
@@ -91,12 +82,13 @@ class Indicator:
 
 		for configItem in config.cfg:
 
-			item = Item()
-			item.init(configItem,numero)
+			item = configItem["module"]()
+			del configItem["module"]
+			item.init(numero,configItem)
 			self.items.append(item)
 
-			if item.cfg["slot"] > maxSlot:
-				maxSlot = item.cfg["slot"]
+			if item.config["slot"] > maxSlot:
+				maxSlot = item.config["slot"]
 
 			numero += 1
 
@@ -118,7 +110,7 @@ class Indicator:
 		for item in self.items: 
 			active = item.tick()
 			if active:
-				slotIndex = item.cfg["slot"]
+				slotIndex = item.config["slot"]
 				self.slots[slotIndex] = item
 
 
@@ -146,7 +138,7 @@ if __name__ == '__main__':
 	try: app.main()
 	except KeyboardInterrupt:
 		app.send("!")
-		print("\r- aborted")
 	except serial.serialutil.SerialException:
-		print("\r- disconnected")
+		type, value, traceback = sys.exc_info()
+		print(value.args[0])
 	os._exit(0)
