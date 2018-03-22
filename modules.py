@@ -21,15 +21,28 @@ class ExampleModule(indicator.Module):
 
 
 class CheckPs(indicator.Module):
-	# check "ps -e" for command name
+	# count number of running instances of a command
 
 	def check(self):
 
 		command = self.config["parm"]
 
 		output = os.popen(
-			"ps -e -o ucomm | cut -d' ' -f1 | grep '^" + command + "$'"
+			"ps -e -o ucomm"
+			" | cut -d' ' -f1"
+			" | grep '^" + command + "$'"
+			" | wc -l"
 		).read()
 
-		if len(output) == 0: return 0
-		else: return 1
+		return int(output)
+
+
+class CheckCmd(indicator.Module):
+	# count output lines of a custom command
+
+	def check(self):
+
+		command = self.config["parm"]
+		output = os.popen(command + " | wc -l").read()
+
+		return int(output)

@@ -5,35 +5,30 @@ cfg = [
 
 	{
 		"slot": 0,
-		"module": modules.CheckPs,
-		"parm": "cat",
+		"module": modules.CheckCmd,
+		"parm": "who",
 		"freq": 4,
-		"colors": ["100","f00"]
-	},
-
-	{
-		"slot": 0,
-		"module": modules.CheckPs,
-		"parm": "tail",
-		"freq": 4,
-		"phase": 2,
-		"colors": ["001","00f"]
+		"phase": 9,
+		"colors": ["111","993","f99"]
 	},
 
 	{
 		"slot": 1,
 		"module": modules.CheckPs,
-		"parm": "cat",
-		"freq": 1,
-		"colors": ["100","f00"]
+		"parm": "youtube-dl",
+		"freq": 4,
+		"phase": 0,
+		"colors": ["111","c00"],
 	},
 
 	{
-		"slot": 2,
+		"slot": 1,
 		"module": modules.CheckPs,
-		"parm": "tail",
-		"freq": 1,
-		"colors": ["001","00f"]
+		"parm": "youtube-dl",
+		"freq": 4,
+		"phase": 0,
+		"colors": ["111","c00"],
 	},
+
 
 ]

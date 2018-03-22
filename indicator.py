@@ -17,6 +17,7 @@ class Module:
 		self.numero = numero
 		self.config = config
 		self.result = 0
+		self.last = "000"
 
 		try: self.counter = self.config["phase"]
 		except KeyError: self.counter = 0
@@ -41,7 +42,16 @@ class Module:
 
 	def color(self):
 
-		color = self.config["colors"][self.result]
+		if self.result is None:
+			return self.last
+
+		index = self.result
+		if index >= len(self.config["colors"]):
+			index = len(self.config["colors"]) - 1
+		color = self.config["colors"][index]
+
+		self.last = color
+
 		return color
 
 
@@ -117,11 +127,14 @@ class Indicator:
 	def collectSlots(self):
 
 		self.result = ""
-		
+
 		for item in self.slots:
+			
 			if self.result == "": self.result = ":"
 			else: self.result += "-"
-			self.result += item.color()
+
+			if item is None: self.result += "000"
+			else: self.result += item.color()
 		
 		self.result += ";"
 
