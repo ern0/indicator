@@ -21,7 +21,7 @@ class Module:
 
 		try: self.counter = self.config["phase"]
 		except KeyError: self.counter = 0
-
+		
 
 	def tick(self):
 
@@ -76,7 +76,8 @@ class Indicator:
 			os._exit(1)		
 
 		self.serial = serial.Serial(dev,9600)
-		time.sleep(1.5)
+		time.sleep(2)
+		
 		self.send("!") # reset
 
 
@@ -144,13 +145,14 @@ class Indicator:
 		self.send(self.result)
 
 
-
 if __name__ == '__main__':
 
 	app = Indicator()
 	try: app.main()
 	except KeyboardInterrupt:
 		app.send("!")
+	except PermissionError:
+		print("need permission for serial port")
 	except serial.serialutil.SerialException:
 		type, value, traceback = sys.exc_info()
 		print(value.args[0])

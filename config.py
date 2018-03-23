@@ -3,31 +3,31 @@ import modules
 
 cfg = [
 
-	{
-		"slot": 0,
-		"module": modules.CheckCmd,
-		"parm": "who",
-		"freq": 4,
-		"phase": 9,
-		"colors": ["111","993","f99"]
+
+	# compiler 
+	
+	{ 
+		"slot": 7 +32,
+		"module": modules.CheckPs,
+		"parm": "make",
+		"freq": 1,
+		"colors": ["006","ff0"]
 	},
 
-	{
-		"slot": 1,
+	{ 
+		"slot": 6 +32,
 		"module": modules.CheckPs,
-		"parm": "youtube-dl",
-		"freq": 4,
-		"phase": 0,
-		"colors": ["111","c00"],
+		"parm": "gcc",
+		"freq": 1,
+		"colors": ["006","3f3"]
 	},
 
-	{
-		"slot": 1,
+	{ 
+		"slot": 5 +32,
 		"module": modules.CheckPs,
-		"parm": "youtube-dl",
-		"freq": 4,
-		"phase": 0,
-		"colors": ["111","c00"],
+		"parm": "ld",
+		"freq": 1,
+		"colors": ["006","f33"]
 	},
 
 

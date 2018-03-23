@@ -20,7 +20,7 @@ class ExampleModule(indicator.Module):
 		else: return 0
 
 
-class CheckPs(indicator.Module):
+class ProcRun(indicator.Module):
 	# count number of running instances of a command
 
 	def check(self):
@@ -37,12 +37,45 @@ class CheckPs(indicator.Module):
 		return int(output)
 
 
-class CheckCmd(indicator.Module):
+class ProcFull(indicator.Module):
+	# count number of running instances based on "ps -ef"
+
+	def check(self):
+
+		pattern = self.config["parm"]
+
+		output = os.popen(
+			"ps -ef"
+			" | grep -v grep"
+			" | grep '" + pattern + "'"
+			" | wc -l"
+		).read()
+
+		return int(output)
+
+
+class CustomCommand(indicator.Module):
 	# count output lines of a custom command
 
 	def check(self):
 
 		command = self.config["parm"]
-		output = os.popen(command + " | wc -l").read()
+		output = os.popen(
+			command + 
+			" | grep -v grep"
+			" | wc -l"
+		).read()
 
 		return int(output)
+
+
+class FilePattern(indicator.Module):
+	# count files matching a given pattern
+
+	def check(self):
+
+		mask = self.config["parm"]
+		output = os.popen("ls -1 " + mask + " | wc -l").read()
+
+		return int(output)
+
