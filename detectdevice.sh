@@ -8,5 +8,5 @@ fi
 if [ "$(uname)" == "Darwin" ]; then
 	ls -1 /dev/tty.* | grep -v Bluetooth | head -n $NUM | tail -n 1
 else
-	ls -1 /dev/ttyUSB? | head -n $NUM | tail -n 1
+	ls -1 /dev/ttyUSB? /dev/ttyACM? | head -n $NUM | tail -n 1
 fi
