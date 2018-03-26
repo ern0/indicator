@@ -5,54 +5,8 @@ sys.dont_write_bytecode = True
 import os
 import time
 import serial
-
-import config
-
-
-class Module:
-
-
-	def init(self,numero,config):
-
-		self.numero = numero
-		self.config = config
-		self.result = 0
-		self.last = "000"
-
-		try: self.counter = self.config["phase"]
-		except KeyError: self.counter = 0
-		
-
-	def tick(self):
-
-		active = False
-
-		if self.counter == 0: 
-			chk = self.check()
-			if chk is not None: 
-				self.result = chk
-				active = True
-
-		self.counter += 1
-		if self.counter >= self.config["freq"]: 
-			self.counter = 0
-
-		return active
-
-
-	def color(self):
-
-		if self.result is None:
-			return self.last
-
-		index = self.result
-		if index >= len(self.config["colors"]):
-			index = len(self.config["colors"]) - 1
-		color = self.config["colors"][index]
-
-		self.last = color
-
-		return color
+from threading import Thread
+from threading import Lock
 
 
 class Indicator:
@@ -60,18 +14,46 @@ class Indicator:
 
 	def main(self):
 
+		self.initConcurrency()
+
 		self.connect()
 		self.loadConfig()
 		self.run()
 
 
+	def initConcurrency(self):
+		
+		self.serialFlag = False
+		self.serialLock = Lock()
+		self.serialData = {}
+		
+		self.forwardFlag = False
+		self.forwardLock = Lock()
+		self.forwardData = {}
+		
+
+	def detectDevice(self):
+		
+		devDir = os.listdir("/dev")
+		for devFile in devDir:			
+		
+			if "Bluetooth" in devFile: continue
+			
+			found = False
+			if "dev." in devFile: found = True
+			if devFile[0:6] == "ttyUSB": found = True
+			if devFile[0:6] == "ttyACM": found = True
+			
+			if found: return "/dev/" + devFile
+		
+		return None
+		
+
 	def connect(self):
 
-		dev = os.popen(
-			"./detectdevice.sh"
-		).read().split("\n")[0]
+		dev = self.detectDevice()
 
-		if dev == "":
+		if dev is None:
 			print("no device found")
 			os._exit(1)		
 
@@ -145,6 +127,51 @@ class Indicator:
 		self.send(self.result)
 
 
+class Module:
+
+	def init(self,numero,config):
+
+		self.numero = numero
+		self.config = config
+		self.result = 0
+		self.last = "000"
+
+		try: self.counter = self.config["phase"]
+		except KeyError: self.counter = 0
+		
+
+	def tick(self):
+
+		active = False
+
+		if self.counter == 0: 
+			chk = self.check()
+			if chk is not None: 
+				self.result = chk
+				active = True
+
+		self.counter += 1
+		if self.counter >= self.config["freq"]: 
+			self.counter = 0
+
+		return active
+
+
+	def color(self):
+
+		if self.result is None:
+			return self.last
+
+		index = self.result
+		if index >= len(self.config["colors"]):
+			index = len(self.config["colors"]) - 1
+		color = self.config["colors"][index]
+
+		self.last = color
+
+		return color
+
+
 if __name__ == '__main__':
 
 	app = Indicator()
@@ -155,5 +182,5 @@ if __name__ == '__main__':
 		print("need permission for serial port")
 	except serial.serialutil.SerialException:
 		type, value, traceback = sys.exc_info()
-		print(value.args[0])
+		print(value.args)
 	os._exit(0)

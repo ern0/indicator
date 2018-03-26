@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PORT=`../util/detectdevice.sh "$1"`
+PORT=`./detectdevice.sh "$1"`
 if [ ! -z ${PORT} ]; then
 	miniterm.py ${PORT} 9600 -e --exit-char 3
 fi
