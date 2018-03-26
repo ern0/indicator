@@ -15,7 +15,9 @@ class Indicator:
 	def main(self):
 
 		self.about()
+		self.initFeatures()
 		self.loadConfig()
+		self.connectDevice()
 
 		self.initConcurrency()
 		#self.connect()
@@ -33,6 +35,13 @@ class Indicator:
 	def fatal(self,msg):
 		self.noti(msg)
 		os._exit(1)
+
+
+	def initFeatures(self):
+
+		self.listen = None
+		self.forward = None
+		self.serial = None
 
 
 	def loadConfig(self):
@@ -57,6 +66,29 @@ class Indicator:
 		self.forwardData = {}
 		
 
+	def connectDevice(self):
+
+		self.serial = None
+
+		try: dummy = self.config.show
+		except AttributeError:
+			self.noti("skipping device detection, not configured")
+			return
+
+		dev = self.detectDevice()
+
+		if dev is None:
+			self.noti("no device found")
+			return
+
+		self.noti("device found: " + dev)
+
+		self.serial = serial.Serial(dev,9600)
+		time.sleep(2)
+		
+		self.send("!") # reset
+
+
 	def detectDevice(self):
 		
 		devDir = os.listdir("/dev")
@@ -65,7 +97,7 @@ class Indicator:
 			if "Bluetooth" in devFile: continue
 			
 			found = False
-			if "dev." in devFile: found = True
+			if devFile.find("tty.") == 0: found = True
 			if devFile[0:6] == "ttyUSB": found = True
 			if devFile[0:6] == "ttyACM": found = True
 			
@@ -73,19 +105,6 @@ class Indicator:
 		
 		return None
 		
-
-	def connect(self):
-
-		dev = self.detectDevice()
-
-		if dev is None:
-			print("no device found")
-			os._exit(1)		
-
-		self.serial = serial.Serial(dev,9600)
-		time.sleep(2)
-		
-		self.send("!") # reset
 
 
 	def send(self,data):
