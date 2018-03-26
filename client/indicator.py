@@ -14,11 +14,36 @@ class Indicator:
 
 	def main(self):
 
-		self.initConcurrency()
-
-		self.connect()
+		self.about()
 		self.loadConfig()
-		self.run()
+
+		self.initConcurrency()
+		#self.connect()
+		#self.run()
+
+
+	def about(self):
+		print("indicator")
+
+
+	def noti(self,msg):
+		print(" " + msg)
+
+
+	def fatal(self,msg):
+		self.noti(msg)
+		os._exit(1)
+
+
+	def loadConfig(self):
+
+		configName = sys.argv[1]
+		try: 
+			self.config = __import__(configName.replace(".py",""))
+		except ModuleNotFoundError:
+			self.fatal("config not found:s " + configName)
+
+		self.noti("configuration: " + configName)
 
 
 	def initConcurrency(self):
@@ -65,27 +90,6 @@ class Indicator:
 
 	def send(self,data):
 		self.serial.write(data.encode())
-
-
-	def loadConfig(self):
-
-		maxSlot = 0
-		self.items = []
-		numero = 1
-
-		for configItem in config.cfg:
-
-			item = configItem["module"]()
-			del configItem["module"]
-			item.init(numero,configItem)
-			self.items.append(item)
-
-			if item.config["slot"] > maxSlot:
-				maxSlot = item.config["slot"]
-
-			numero += 1
-
-		self.slots = [None] * (1 + maxSlot)
 
 
 	def run(self):

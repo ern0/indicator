@@ -4,7 +4,7 @@ check = [
 
 	{ 
 		"token": "ld",
-		"module": modules.CheckPs,
+		#"module": modules.CheckPs,
 		"parm": "make",
 		"freq": 1,
 	},

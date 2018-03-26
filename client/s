@@ -2,8 +2,13 @@
 clear
 
 if [ "$TERM" != "screen" ]; then
-	tmux new -d -s indicator "./indicator.py config.local.py ; sleep 9999"
-	tmux split-window "bash ; tmux kill-session -t indicator"
+	tmux  \
+	new-session -s indicator \
+		"./indicator.py config-local.py ; sleep 9999" \; \
+	split-window -p79 \
+		"./indicator.py config-remote.py ; sleep 9999" \; \
+	split-window -p70 \
+		"bash ; tmux kill-session -t indicator"
 	tmux a
 	exit 0
 fi
