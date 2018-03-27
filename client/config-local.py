@@ -1,4 +1,5 @@
 listen = 9095
+xxx_device = "/dev/ttyUSB0"
 
 check = [
 

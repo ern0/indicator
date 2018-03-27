@@ -16,16 +16,28 @@ class Indicator:
 
 		self.about()
 		self.loadConfig()
-		self.initFeatures()
+
+		self.initLoadConfigFlags()
+		self.initCheckEmptyConfig()
+		self.initDevice()
+		self.resetDevice()
+
+		self.initShow()
+		self.initForward()
+		self.initCheck()
+		self.initListen()
+
+		while True:
+			sys.stderr.write(".")
+			sys.stderr.flush()
+			time.sleep(4)
 
 
 	def about(self):
-
 		print("indicator")
 
 
 	def noti(self,msg):
-
 		print(" " + msg)
 
 
@@ -43,7 +55,7 @@ class Indicator:
 			self.fatal("config not found: " + self.configName)
 
 
-	def initFeatures(self):
+	def initLoadConfigFlags(self):
 
 		try: 
 			dummy = self.config.check
@@ -69,6 +81,15 @@ class Indicator:
 		except AttributeError:
 			self.forwardFlag = False
 
+		try: 
+			dummy = self.config.device
+			self.forcedDeviceFlag = True
+		except AttributeError:
+			self.forcedDeviceFlag = False
+
+
+	def initCheckEmptyConfig(self):
+
 		isAnySource = self.checkFlag or self.listenFlag
 		isAnySink = self.showFlag or self.forwardFlag
 
@@ -82,58 +103,42 @@ class Indicator:
 		if not isAnySink:
 			self.fatal("no output configured")
 
-		if self.showFlag:
-			self.initDevice()
-			if self.device is not None:
-				self.noti("device found: " + self.device)
-			else:
-				self.fatal("no device found")
-
-
-
-		return
-		self.showFlag = self.initShow()
-		if self.showFlag:
-			self.deviceFlag = self.initDevice()
-			if not self.deviceFlag:
-				self.fatal("no device found")
-
-		else:
-			self.noti("no device configured")
-			self.deviceFlag = False
-
-		if (self.showFlag) and (not self.deviceFlag):
-			pass
-
-		if (self.deviceFlag) and (not self.showFlag):
-			self.deviceFlag = False
-
-		self.forwardFlag = self.initForward()
-
-		self.checkFlag = self.initCheck()
-		self.listenFlag = self.initListen()
-
-		self.sourceFlag = self.checkFlag or self.listenFlag
-
-
-
-		self.localFlag = self.showFlag and self.deviceFlag
-
-
-		self.sinkFlag = self.localFlag or self.forwardFlag
-
-		self.noti("no source to forward")
-
 
 	def initDevice(self):
 
-		self.device = self.detectDevice()
+		if not self.showFlag: return
+
+		self.openDevice()
+
+		if self.device is None:
+			if self.forcedDeviceFlag: 
+				self.fatal("device not found: " + self.config.device)
+			else: 
+				self.fatal("no device found")
+			return
+
+		self.noti("device found: " + self.device)
+
+		self.serialLock = Lock()
+		self.serialData = {}
+
+
+	def openDevice(self):
+
+		self.device = None
+
+		try: 
+			self.device = self.config.device
+		except AttributeError:
+			self.device = self.detectDevice()
 		
 		if self.device is None: return
 
-		self.serial = serial.Serial(self.device,9600)
-		time.sleep(2)
-		self.send("!") # reset
+		try:
+			self.serial = serial.Serial(self.device,9600)
+		except Exception:
+			self.device = None
+			return
 
 
 	def detectDevice(self):
@@ -153,19 +158,55 @@ class Indicator:
 		return None
 		
 
+	def resetDevice(self):
+
+		if not self.showFlag: return
+
+		time.sleep(2)
+		self.send("!")
+
+
 	def send(self,data):
 
+		if not self.showFlag: return
 		self.serial.write(data.encode())
 
 
-	def initCommon(self):
+	def initShow(self):
 
-		self.serialLock = Lock()
-		self.serialData = {}
-		
+		if not self.showFlag: return
+
+		self.showLock = Lock()
+		self.showData = {}
+
+		print("todo... init show")
+
+
+	def initForward(self):
+
+		if not self.forwardFlag: return
+
 		self.forwardLock = Lock()
 		self.forwardData = {}
-		
+
+		print("todo... init forward")
+
+
+	def initCheck(self):
+
+		if not self.checkFlag: return
+
+		print("todo... init check")
+
+
+	def initListen(self):
+
+		if not self.listenFlag: return
+
+		print("todo... init listen")
+
+
+
 
 	def run(self):
 
