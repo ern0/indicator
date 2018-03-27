@@ -1,16 +1,6 @@
 listen = 9095
 xxx_device = "/dev/ttyUSB0"
 
-check = [
-
-	{ 
-		"token": "ld",
-		#"module": modules.CheckPs,
-		"parm": "make",
-		"freq": 1,
-	},
-
-]
 
 show = [
 	{

@@ -27,10 +27,7 @@ class Indicator:
 		self.initCheck()
 		self.initListen()
 
-		while True:
-			sys.stderr.write(".")
-			sys.stderr.flush()
-			time.sleep(4)
+		while True: time.sleep(2018)
 
 
 	def about(self):
@@ -195,8 +192,7 @@ class Indicator:
 	def initCheck(self):
 
 		if not self.checkFlag: return
-
-		print("todo... init check")
+		(Check()).init(self).start()
 
 
 	def initListen(self):
@@ -206,9 +202,35 @@ class Indicator:
 		print("todo... init listen")
 
 
+class Check(Thread):
+
+
+	def init(self,indicator):
+		
+		self.indicator = indicator
+
+		self.indicator.fatal("lyaly")
+
+		self.items = {}
+		for item in self.indicator.config.check:
+			pass
+			#self.items[]
+
+		return self
 
 
 	def run(self):
+
+		while True:
+			time.sleep(1)
+
+
+
+
+#######################################
+
+
+	def ruan(self):
 
 		while True:
 
