@@ -9,7 +9,6 @@ if [ "$TERM" != "screen" ]; then
 		"./indicator.py config-remote.py ; sleep 9999" \; \
 	split-window -p70 \
 		"bash ; tmux kill-session -t indicator"
-	tmux a
 	exit 0
 fi
 
