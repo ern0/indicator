@@ -176,7 +176,7 @@ class Indicator:
 		self.showLock = Lock()
 		self.showData = {}
 
-		print("todo... init show")
+		# todo
 
 
 	def initForward(self):
@@ -186,7 +186,7 @@ class Indicator:
 		self.forwardLock = Lock()
 		self.forwardData = {}
 
-		print("todo... init forward")
+		# todo
 
 
 	def initCheck(self):
@@ -195,11 +195,25 @@ class Indicator:
 		(Check()).init(self).start()
 
 
+
 	def initListen(self):
 
 		if not self.listenFlag: return
 
-		print("todo... init listen")
+		# todo
+
+
+	def registerResult(self,token,value):
+
+		if self.forwardFlag:
+			self.forwardLock.acquire()
+			self.forwardData[token] = value
+			self.forwardLock.release()
+
+		if self.showFlag:
+			self.showLock.acquire()
+			self.showData[token] = value
+			self.showLock.release()
 
 
 class Check(Thread):
@@ -209,12 +223,24 @@ class Check(Thread):
 		
 		self.indicator = indicator
 
-		self.indicator.fatal("lyaly")
-
 		self.items = {}
-		for item in self.indicator.config.check:
-			pass
-			#self.items[]
+		numero = 1
+		for configItem in self.indicator.config.check:
+			
+			configItem["numero"] = numero
+			self.items[numero] = CheckItem(configItem)
+
+			try: 
+				parm = configItem["parm"]
+			except KeyError: 
+				parm = None
+				
+			try:
+				self.items[numero].module = configItem["module"](parm)
+			except TypeError:
+				self.items[numero].module = configItem["module"]()
+
+			numero += 1
 
 		return self
 
@@ -222,31 +248,54 @@ class Check(Thread):
 	def run(self):
 
 		while True:
+
+			for key in self.items:
+				item = self.items[key]
+				item.tick()
+				if item.result is not None:
+					self.indicator.registerResult(item.config["token"],item.result)
+					print(item.config["token"],item.result)
+
 			time.sleep(1)
 
+
+class CheckItem:
+
+	def __init__(self,config):
+
+		self.config = config
+
+		try: self.counter = self.config["phase"]
+		except KeyError: self.counter = 0
+
+
+	def tick(self):
+
+		self.result = None
+
+		if self.config["freq"] <= 0: return
+
+		if self.counter == 0: 
+			
+			try: 
+				parm = self.config["parm"]
+			except KeyError: 
+				parm = None
+
+			try:
+				self.result = self.module.check(parm)
+			except TypeError:
+				self.result = self.module.check()
+
+		self.counter += 1
+		if self.counter >= self.config["freq"]: 
+			self.counter = 0
 
 
 
 #######################################
 
 
-	def ruan(self):
-
-		while True:
-
-			self.scanItems()
-			self.collectSlots()
-			self.showResult()
-			time.sleep(1)
-
-
-	def scanItems(self):
-
-		for item in self.items: 
-			active = item.tick()
-			if active:
-				slotIndex = item.config["slot"]
-				self.slots[slotIndex] = item
 
 
 	def collectSlots(self):
@@ -269,34 +318,7 @@ class Check(Thread):
 		self.send(self.result)
 
 
-class Module:
-
-	def init(self,numero,config):
-
-		self.numero = numero
-		self.config = config
-		self.result = 0
-		self.last = "000"
-
-		try: self.counter = self.config["phase"]
-		except KeyError: self.counter = 0
-		
-
-	def tick(self):
-
-		active = False
-
-		if self.counter == 0: 
-			chk = self.check()
-			if chk is not None: 
-				self.result = chk
-				active = True
-
-		self.counter += 1
-		if self.counter >= self.config["freq"]: 
-			self.counter = 0
-
-		return active
+class xxxModule:	
 
 
 	def color(self):
