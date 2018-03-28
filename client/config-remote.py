@@ -8,19 +8,18 @@ check = [
 	{ 
 		"token": "true",
 		"module": module.Test.Echo,
-		"parm": "1",
+		"parm": 1,
 		"freq": 1,
 	},
 	{ 
 		"token": "false",
 		"module": module.Test.Echo,
-		"parm": "0",
+		"parm": 0,
 		"freq": 1,
 	},
 	{ 
 		"token": "zulu",
 		"module": module.Test.Zero,
-		"parm": "0",
 		"freq": 1,
 	},
 	{ 
