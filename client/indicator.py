@@ -45,11 +45,19 @@ class Indicator:
 
 	def loadConfig(self):
 
-		self.configName = sys.argv[1]
+		try:
+			self.configName = sys.argv[1]
+		except IndexError:
+			self.fatal("config file not specified")
+
+		if not os.path.isfile(self.configName):
+			self.fatal("config not found: " + self.configName)
+
 		try: 
 			self.config = __import__(self.configName.replace(".py",""))
-		except ModuleNotFoundError:
-			self.fatal("config not found: " + self.configName)
+		except:
+			type, value, traceback = sys.exc_info()
+			self.fatal("invalid config: " + str(value))
 
 
 	def initLoadConfigFlags(self):
