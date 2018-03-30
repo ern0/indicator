@@ -5,6 +5,7 @@ sys.dont_write_bytecode = True
 import os
 import time
 import serial
+from importmodule import importmodule
 from threading import Thread
 from threading import Lock
 
@@ -50,11 +51,10 @@ class Indicator:
 		except IndexError:
 			self.fatal("config file not specified")
 
-		if not os.path.isfile(self.configName):
-			self.fatal("config not found: " + self.configName)
-
 		try: 
-			self.config = __import__(self.configName.replace(".py",""))
+			self.config = importmodule(self.configName)
+		except FileNotFoundError:
+			self.fatal("config not found: " + self.configName)
 		except:
 			type, value, traceback = sys.exc_info()
 			self.fatal("invalid config: " + str(value))
@@ -94,6 +94,11 @@ class Indicator:
 
 
 	def initCheckEmptyConfig(self):
+
+		print(self.checkFlag)
+		print(self.listenFlag)
+		print(self.showFlag)
+		print(self.forwardFlag)
 
 		isAnySource = self.checkFlag or self.listenFlag
 		isAnySink = self.showFlag or self.forwardFlag
