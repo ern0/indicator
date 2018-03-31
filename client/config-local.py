@@ -21,6 +21,14 @@ check = [
 		"phase": 1,
 	},
 
+	{ 
+		"token": "ff",
+		"module": example.ExampleModule.FlipFlop,
+		"parm": 1,
+		"freq": 5,
+		"phase": 3,
+	},
+
 ]
 
 
@@ -33,9 +41,15 @@ show = [
 	},
 
 	{
-		"slot": 1,
+		"slot": 2,
 		"token": "flopflip",
 		"colors": [ "000", "ff0" ],
+	},
+
+	{
+		"slot": 7,
+		"token": "ff",
+		"colors": [ "000", "fff" ],
 	}
 	
 ]

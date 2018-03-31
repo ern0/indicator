@@ -9,6 +9,7 @@ from importmodule import importmodule
 from threading import Thread
 from threading import Lock
 
+#----------------------------------------------------------------------
 
 class Indicator:
 
@@ -21,7 +22,6 @@ class Indicator:
 		self.initLoadConfigFlags()
 		self.initCheckEmptyConfig()
 		self.initDevice()
-		self.resetDevice()
 
 		self.initShow()
 		self.initForward()
@@ -163,14 +163,6 @@ class Indicator:
 		return None
 		
 
-	def resetDevice(self):
-
-		if not self.showFlag: return
-
-		time.sleep(2)
-		self.send("!")
-
-
 	def send(self,data):
 
 		if not self.showFlag: return
@@ -184,7 +176,7 @@ class Indicator:
 		self.showLock = Lock()
 		self.showData = {}
 
-		# todo
+		self.show = Show(self)
 
 
 	def initForward(self):
@@ -200,7 +192,7 @@ class Indicator:
 	def initCheck(self):
 
 		if not self.checkFlag: return
-		(Check()).init(self).start()
+		(Check(self)).start()
 
 
 
@@ -223,16 +215,23 @@ class Indicator:
 			self.showData[token] = value
 			self.showLock.release()
 
+#----------------------------------------------------------------------
 
 class Check(Thread):
 
 
-	def init(self,indicator):
-		
+	def __init__(self,indicator):
+		Thread.__init__(self)
+
 		self.indicator = indicator
+		self.initItems()
+
+
+	def initItems(self):
 
 		self.items = {}
 		numero = 1
+
 		for configItem in self.indicator.config.check:
 			
 			configItem["numero"] = numero
@@ -252,8 +251,6 @@ class Check(Thread):
 
 			numero += 1
 
-		return self
-
 
 	def run(self):
 
@@ -264,10 +261,13 @@ class Check(Thread):
 				item.tick()
 				if item.result is not None:
 					self.indicator.registerResult(item.config["token"],item.result)
-					print(item.config["token"],item.result)
+
+			if self.indicator.showFlag:
+				self.indicator.show.update()
 
 			time.sleep(1)
 
+#----------------------------------------------------------------------
 
 class CheckItem:
 
@@ -302,6 +302,7 @@ class CheckItem:
 		if self.counter >= self.config["freq"]: 
 			self.counter = 0
 
+#----------------------------------------------------------------------
 
 class Module:	
 
@@ -314,47 +315,84 @@ class Module:
 		return self.result
 
 
+#----------------------------------------------------------------------
 
-#######################################
+class Show():
+
+	def __init__(self,indicator):
+		
+		self.indicator = indicator
+		self.initSlots()
+
+		time.sleep(2)
+		self.indicator.send("!")
 
 
+	def initSlots(self):
+		
+		config = self.indicator.config.show
+
+		maxSlot = -1
+
+		for showItem in config:
+			slot = showItem["slot"]
+			if slot > maxSlot: maxSlot = slot
+		maxSlot += 1
+
+		self.slots = ["000"] * (maxSlot)
 
 
-	def collectSlots(self):
+	def update(self):
+
+		self.fillSlots()
+		self.composeResult()
+
+		self.indicator.send(self.result)
+
+
+	def fillSlots(self):
+
+		config = self.indicator.config.show
+		data = self.copyData()
+
+		for showItem in config:
+			slot = showItem["slot"]
+			token = showItem["token"]
+			colors = showItem["colors"]
+
+			try: value = data[token]
+			except KeyError: continue
+
+			try: 
+				color = colors[value]
+			except KeyError: 
+				color = colors[len(colors) - 1]
+
+			self.slots[slot] = color
+
+
+	def copyData(self):
+
+		data = {}
+		self.indicator.showLock.acquire()
+		for i in self.indicator.showData: 
+			data[i] = self.indicator.showData[i]
+		self.indicator.showLock.release()
+
+		return data
+
+
+	def composeResult(self):
 
 		self.result = ""
+		for color in self.slots:
 
-		for item in self.slots:
-			
 			if self.result == "": self.result = ":"
 			else: self.result += "-"
 
-			if item is None: self.result += "000"
-			else: self.result += item.color()
-		
+			self.result += str(color)
+
 		self.result += ";"
-
-
-	def showResult(self):
-
-		self.send(self.result)
-
-
-class xxx:
-
-	def color(self):
-
-		if self.result is None:
-			return self.last
-
-		index = self.result
-		if index >= len(self.config["colors"]):
-			index = len(self.config["colors"]) - 1
-		color = self.config["colors"][index]
-
-		self.last = color
-
-		return color
 
 
 if __name__ == '__main__':
