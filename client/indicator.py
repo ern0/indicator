@@ -95,11 +95,6 @@ class Indicator:
 
 	def initCheckEmptyConfig(self):
 
-		print(self.checkFlag)
-		print(self.listenFlag)
-		print(self.showFlag)
-		print(self.forwardFlag)
-
 		isAnySource = self.checkFlag or self.listenFlag
 		isAnySink = self.showFlag or self.forwardFlag
 
@@ -248,10 +243,12 @@ class Check(Thread):
 			except KeyError: 
 				parm = None
 				
+			self.items[numero].module = configItem["module"]()
+
 			try:
-				self.items[numero].module = configItem["module"](parm)
+				self.items[numero].module.init(parm)
 			except TypeError:
-				self.items[numero].module = configItem["module"]()
+				self.items[numero].module.init()
 
 			numero += 1
 
@@ -296,13 +293,25 @@ class CheckItem:
 				parm = None
 
 			try:
-				self.result = self.module.check(parm)
+				self.module.check(parm)
 			except TypeError:
-				self.result = self.module.check()
+				self.module.check()
+			self.result = self.module.getResult()
 
 		self.counter += 1
 		if self.counter >= self.config["freq"]: 
 			self.counter = 0
+
+
+class Module:	
+
+
+	def setResult(self,value):
+		self.result = value
+
+
+	def getResult(self):
+		return self.result
 
 
 
@@ -331,8 +340,7 @@ class CheckItem:
 		self.send(self.result)
 
 
-class xxxModule:	
-
+class xxx:
 
 	def color(self):
 
