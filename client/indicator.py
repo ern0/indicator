@@ -2,12 +2,15 @@
 
 import sys
 sys.dont_write_bytecode = True
+
 import os
 import time
 import serial
-from importmodule import importmodule
+import socket
 from threading import Thread
 from threading import Lock
+from urllib.parse import parse_qs,urlparse
+from importmodule import importmodule
 
 #----------------------------------------------------------------------
 
@@ -199,8 +202,7 @@ class Indicator:
 	def initListen(self):
 
 		if not self.listenFlag: return
-
-		# todo
+		(Listen(self)).start()
 
 
 	def registerResult(self,token,value):
@@ -210,15 +212,15 @@ class Indicator:
 			self.forwardData[token] = value
 			self.forwardLock.release()
 
-		if self.showFlag:
+		if self.showFlag:	
 			self.showLock.acquire()
 			self.showData[token] = value
 			self.showLock.release()
 
+
 #----------------------------------------------------------------------
 
 class Check(Thread):
-
 
 	def __init__(self,indicator):
 		Thread.__init__(self)
@@ -264,6 +266,10 @@ class Check(Thread):
 
 			if self.indicator.showFlag:
 				self.indicator.show.update()
+
+			if self.indicator.forwardFlag:
+				pass
+				#self.indicator.forward.transmit()
 
 			time.sleep(1)
 
@@ -314,6 +320,63 @@ class Module:
 	def getResult(self):
 		return self.result
 
+
+#----------------------------------------------------------------------
+
+class Listen(Thread):
+
+	def __init__(self,indicator):
+		Thread.__init__(self)
+
+		self.indicator = indicator
+
+
+	def run(self):
+
+		connection = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+		connection.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+		connection.bind(("0.0.0.0",self.indicator.config.listen))
+		connection.listen(11)
+
+		while True:
+
+			(current_connection,address) = connection.accept()	
+			data = current_connection.recv(2048)
+			data = data.decode("utf-8")
+
+			if data[0:4] == "GET ":
+				success = self.proc(data)
+			else:
+				success = False
+
+			if success:
+				current_connection.send(b"HTTP/1.1 200 OK\r\n")
+			else:
+				current_connection.send(b"HTTP/1.1 400 Bad Request\r\n")
+			current_connection.send(b"Content-Type: text/html; charset=UTF-8\r\n")
+			current_connection.send(b"Connection: close\r\n")
+			current_connection.send(b"\r\n")
+			
+			current_connection.send(b"whatever\n")
+
+			current_connection.shutdown(1)
+			current_connection.close()
+
+
+	def proc(self,data):
+
+		url = data.split(" ")[1]
+		url = parse_qs(urlparse(url).query)
+
+		try: token = url["token"][0]
+		except KeyError: return False
+		try: value = url["value"][0]
+		except KeyError: return False
+		try: value = int(value)
+		except ValueError: return False
+
+		self.indicator.registerResult(token,value)
+		return True
 
 #----------------------------------------------------------------------
 

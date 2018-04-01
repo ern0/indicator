@@ -1,7 +1,6 @@
 import example.ExampleModule
 
 listen = 9095
-device = "/dev/ttyUSB0"
 
 
 check = [
@@ -44,6 +43,12 @@ show = [
 		"slot": 2,
 		"token": "flopflip",
 		"colors": [ "000", "ff0" ],
+	},
+
+	{
+		"slot": 6,
+		"token": "remote",
+		"colors": [ "000", "33f" ],
 	},
 
 	{

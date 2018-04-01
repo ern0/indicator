@@ -1,7 +1,7 @@
 #/bin/bash
 clear
 
-./indicator.py config-local.py ; exit
+#./indicator.py config-local.py ; exit
 
 
 if [ "$TERM" != "screen" ]; then
@@ -15,4 +15,6 @@ if [ "$TERM" != "screen" ]; then
 	exit 0
 fi
 
-curl "http://localhost:9096/?token=mem&value=1"
+curl "http://localhost:9095/?token=remote&value=1"
+sleep 2
+curl "http://localhost:9095/?token=remote&value=0"
