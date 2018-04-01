@@ -1,5 +1,7 @@
 import example.ExampleModule
 
+listen = 9096
+
 forward = [
 	"http://localhost:9095"
 ]

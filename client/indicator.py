@@ -10,10 +10,11 @@ import socket
 from threading import Thread
 from threading import Lock
 from urllib.parse import parse_qs,urlparse
+import http.client
 from importmodule import importmodule
 
-#----------------------------------------------------------------------
 
+#----------------------------------------------------------------------
 class Indicator:
 
 
@@ -64,6 +65,8 @@ class Indicator:
 
 
 	def initLoadConfigFlags(self):
+
+		self.signature = "whatever"
 
 		try: 
 			dummy = self.config.check
@@ -189,14 +192,13 @@ class Indicator:
 		self.forwardLock = Lock()
 		self.forwardData = {}
 
-		# todo
+		(Forward(self)).start()
 
 
 	def initCheck(self):
 
 		if not self.checkFlag: return
 		(Check(self)).start()
-
 
 
 	def initListen(self):
@@ -219,8 +221,8 @@ class Indicator:
 
 
 #----------------------------------------------------------------------
-
 class Check(Thread):
+
 
 	def __init__(self,indicator):
 		Thread.__init__(self)
@@ -267,15 +269,12 @@ class Check(Thread):
 			if self.indicator.showFlag:
 				self.indicator.show.update()
 
-			if self.indicator.forwardFlag:
-				pass
-				#self.indicator.forward.transmit()
-
 			time.sleep(1)
 
-#----------------------------------------------------------------------
 
+#----------------------------------------------------------------------
 class CheckItem:
+
 
 	def __init__(self,config):
 
@@ -308,8 +307,8 @@ class CheckItem:
 		if self.counter >= self.config["freq"]: 
 			self.counter = 0
 
-#----------------------------------------------------------------------
 
+#----------------------------------------------------------------------
 class Module:	
 
 
@@ -322,8 +321,8 @@ class Module:
 
 
 #----------------------------------------------------------------------
-
 class Listen(Thread):
+
 
 	def __init__(self,indicator):
 		Thread.__init__(self)
@@ -333,15 +332,15 @@ class Listen(Thread):
 
 	def run(self):
 
-		connection = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-		connection.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-		connection.bind(("0.0.0.0",self.indicator.config.listen))
-		connection.listen(11)
+		listenConnection = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+		listenConnection.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+		listenConnection.bind(("0.0.0.0",self.indicator.config.listen))
+		listenConnection.listen(11)
 
 		while True:
 
-			(current_connection,address) = connection.accept()	
-			data = current_connection.recv(2048)
+			(connection,address) = listenConnection.accept()	
+			data = connection.recv(2048)
 			data = data.decode("utf-8")
 
 			if data[0:4] == "GET ":
@@ -350,17 +349,20 @@ class Listen(Thread):
 				success = False
 
 			if success:
-				current_connection.send(b"HTTP/1.1 200 OK\r\n")
+				connection.send(b"HTTP/1.1 200 OK\r\n")
 			else:
-				current_connection.send(b"HTTP/1.1 400 Bad Request\r\n")
-			current_connection.send(b"Content-Type: text/html; charset=UTF-8\r\n")
-			current_connection.send(b"Connection: close\r\n")
-			current_connection.send(b"\r\n")
-			
-			current_connection.send(b"whatever\n")
+				connection.send(b"HTTP/1.1 400 Bad Request\r\n")
+				self.indicator.noti("received bad forward request")
 
-			current_connection.shutdown(1)
-			current_connection.close()
+			connection.send(b"Content-Type: text/html; charset=UTF-8\r\n")
+			connection.send(b"Connection: close\r\n")
+			connection.send(b"\r\n")
+
+			sigb = bytearray(self.indicator.signature + "\n","utf-8")
+			connection.send(sigb)
+
+			connection.shutdown(1)
+			connection.close()
 
 
 	def proc(self,data):
@@ -378,9 +380,10 @@ class Listen(Thread):
 		self.indicator.registerResult(token,value)
 		return True
 
-#----------------------------------------------------------------------
 
+#----------------------------------------------------------------------
 class Show():
+
 
 	def __init__(self,indicator):
 		
@@ -458,6 +461,88 @@ class Show():
 		self.result += ";"
 
 
+#----------------------------------------------------------------------
+class Forward(Thread):
+
+
+	def __init__(self,indicator):
+		Thread.__init__(self)
+		
+		self.indicator = indicator
+		self.errorList = {}
+
+
+	def run(self):
+		while True:
+
+			data = self.moveData()
+
+			for token in data:
+				value = data[token]
+				for url in self.indicator.config.forward:
+					self.perform(url,token,value)
+			
+			time.sleep(0.2)
+
+
+	def moveData(self):
+
+		data = {}
+		self.indicator.forwardLock.acquire()
+		for i in self.indicator.forwardData: 
+			data[i] = self.indicator.forwardData[i]
+		self.indicator.forwardData = {}
+		self.indicator.forwardLock.release()
+
+		return data
+
+
+	def perform(self,url,token,value):
+
+		a = url.split(":")
+		
+		if a[0] == "https": 
+			secure = True
+		else: 
+			secure = False
+
+		host = a[1].replace("//","")
+
+		try: 
+			port = int(a[2])
+		except ValueError: 
+			port = 80
+
+		req = "?token=" + token
+		req += "&value=" + str(value)
+		
+		if secure: 
+			conn = http.client.HTTPSConnection(host,port,timeout = 2)
+		else: 
+			conn = http.client.HTTPConnection(host,port,timeout = 2)
+		try:
+			conn.request("GET","/" + req)
+		except ConnectionRefusedError:
+			self.indicator.noti("connection failed: " + url)
+			self.errorList[url] = None
+			time.sleep(2)
+			return
+
+		resp = conn.getresponse()
+		signature = resp.read().decode("utf-8")
+		conn.close()
+
+		try: 
+			del self.errorList[url]
+			self.indicator.noti("connection restored: " + url)
+		except KeyError: 
+			pass
+
+		if signature[0:8] != self.indicator.signature:
+			self.indicator.fatal("unknown service: " + url)
+
+
+#----------------------------------------------------------------------
 if __name__ == '__main__':
 
 	app = Indicator()
