@@ -8,11 +8,11 @@ if [ "$TERM" != "screen" ]; then
 	tmux  \
 	new-session -s indicator \
 		"./indicator.py config-local.py ; sleep 9999" \; \
-	split-window -p79 \
+	split-window -p60 \
 		"./indicator.py config-remote.py ; sleep 9999" \; \
-	split-window -p70 \
+	split-window -p40 \
 		"bash ; tmux kill-session -t indicator"
 	exit 0
 fi
 
-curl "http://localhost:9096/?token=remote&value=1"
+curl "http://localhost:9095/?token=remote&value=9"

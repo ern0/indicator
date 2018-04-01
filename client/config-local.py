@@ -48,7 +48,7 @@ show = [
 	{
 		"slot": 6,
 		"token": "remote",
-		"colors": [ "000", "33f" ],
+		"colors": [ "000", "33f", "0ff" ],
 	},
 
 	{

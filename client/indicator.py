@@ -431,7 +431,7 @@ class Show():
 
 			try: 
 				color = colors[value]
-			except KeyError: 
+			except IndexError: 
 				color = colors[len(colors) - 1]
 
 			self.slots[slot] = color
