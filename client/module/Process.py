@@ -2,30 +2,12 @@ import os
 import indicator
 
 
-# it's easy to create a simple module
-class ExampleModule(indicator.Module):
-
-	# method will be called every config["freq"] secs
-	def check(self):  
-
-		# you can use any value from the config
-		parm = self.config["parm"]  
-
-		# return None for unchanged indication
-		try: result = checkStuff(parm)
-		except: return None
-
-		# calculate and return color index on result
-		if (result >= 100): return 1
-		else: return 0
-
-
 class ProcRun(indicator.Module):
 	# count number of running instances of a command
 
 	def check(self):
 
-		command = self.config["parm"]
+		command = self.getParameter()
 
 		output = os.popen(
 			"ps -e -o ucomm"
@@ -34,7 +16,7 @@ class ProcRun(indicator.Module):
 			" | wc -l"
 		).read()
 
-		return int(output)
+		self.setResult( int(output) )
 
 
 class ProcFull(indicator.Module):
@@ -42,7 +24,7 @@ class ProcFull(indicator.Module):
 
 	def check(self):
 
-		pattern = self.config["parm"]
+		pattern = self.getParameter()
 
 		output = os.popen(
 			"ps -ef"
@@ -51,7 +33,7 @@ class ProcFull(indicator.Module):
 			" | wc -l"
 		).read()
 
-		return int(output)
+		self.setResult( int(output) )
 
 
 class CustomCommand(indicator.Module):
@@ -59,14 +41,15 @@ class CustomCommand(indicator.Module):
 
 	def check(self):
 
-		command = self.config["parm"]
+		command =  self.getParameter()
+
 		output = os.popen(
 			command + 
 			" | grep -v grep"
 			" | wc -l"
 		).read()
 
-		return int(output)
+		self.setResult( int(output) )
 
 
 class FilePattern(indicator.Module):
@@ -74,8 +57,9 @@ class FilePattern(indicator.Module):
 
 	def check(self):
 
-		mask = self.config["parm"]
+		mask =  self.getParameter()
+
 		output = os.popen("ls -1 " + mask + " | wc -l").read()
 
-		return int(output)
+		self.setResult( int(output) )
 

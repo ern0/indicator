@@ -22,7 +22,7 @@ class ExecuteModule:
 
 		print("xmod - execute module")
 		print("usage:")
-		print(" xmod path/to/ModulePack.py ModuleClassName parm")
+		print(" xmod path/to/ModulePack.py ModuleClassName parameter")
 
 		quit()
 
@@ -38,14 +38,17 @@ class ExecuteModule:
 		mod = eval( "self.imported." + self.module + "()" )
 
 		try:
-			mod.init(self.parm)
-		except TypeError:
-			mod.init()
-		
-		try:
-			mod.check(self.parm)
-		except TypeError:
-			mod.check()
+			hasInit = False
+			dummy = mod.init
+			hasInit = True
+		except:
+			pass
+
+		mod.result = 0
+		mod.parameter = self.parm
+
+		if hasInit: mod.init()
+		mod.check()
 
 		self.result = mod.getResult()
 

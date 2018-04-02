@@ -1,4 +1,4 @@
 #/bin/bash
 clear
 
-./xmod.py example/ExampleModulePack.py One 0
+./xmod.py module/Process.py ProcRun bash
