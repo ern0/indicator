@@ -247,14 +247,18 @@ class Check(Thread):
 				parm = None
 				
 			self.items[numero].module = configItem["module"]()
+			self.items[numero].module.parameter = parm
 			self.items[numero].module.result = 0
 
 			try:
-				self.items[numero].module.init(parm)
-			except TypeError:
-				self.items[numero].module.init()
-			except AttributeError:
+				hasInit = False
+				dummy = self.items[numero].module.init
+				hasInit = True
+			except:
 				pass
+
+			if hasInit:
+				self.items[numero].module.init()
 
 			numero += 1
 
@@ -295,15 +299,7 @@ class CheckItem:
 
 		if self.counter == 0: 
 			
-			try: 
-				parm = self.config["parm"]
-			except KeyError: 
-				parm = None
-
-			try:
-				self.module.check(parm)
-			except TypeError:
-				self.module.check()
+			self.module.check()
 			self.result = self.module.getResult()
 
 		self.counter += 1
@@ -313,6 +309,10 @@ class CheckItem:
 
 #----------------------------------------------------------------------
 class Module:	
+
+
+	def getParameter(self):
+		return self.parameter
 
 
 	def setResult(self,value):

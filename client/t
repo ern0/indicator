@@ -1,0 +1,4 @@
+#/bin/bash
+clear
+
+./xmod.py example/ExampleModulePack.py One 0
