@@ -1,4 +1,4 @@
-import example.ExampleModule
+import example.ExampleModulePack as e
 
 listen = 9096
 
@@ -10,7 +10,7 @@ check = [
 
 	{ 
 		"token": "remote",
-		"module": example.ExampleModule.FlipFlop,
+		"module": e.FlipFlop,
 		"parm": 0,
 		"freq": 3,
 	},

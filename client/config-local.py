@@ -1,4 +1,4 @@
-import example.ExampleModule
+import example.ExampleModulePack as e
 
 listen = 9095
 
@@ -7,14 +7,14 @@ check = [
 
 	{ 
 		"token": "flipflop",
-		"module": example.ExampleModule.FlipFlop,
+		"module": e.FlipFlop,
 		"parm": 0,
 		"freq": 2,
 	},
 
 	{ 
 		"token": "flopflip",
-		"module": example.ExampleModule.FlipFlop,
+		"module": e.FlipFlop,
 		"parm": 1,
 		"freq": 2,
 		"phase": 1,
@@ -22,7 +22,7 @@ check = [
 
 	{ 
 		"token": "ff",
-		"module": example.ExampleModule.FlipFlop,
+		"module": e.FlipFlop,
 		"parm": 1,
 		"freq": 5,
 		"phase": 3,

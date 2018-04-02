@@ -3,7 +3,7 @@
 
 # The configuration must import the modules used.
 # This line refers to "example/Example.py"
-import example.ExampleModule
+import example.ExampleModulePack
 
 
 # Listen port for receiving data from other hosts 
@@ -20,24 +20,24 @@ forward = [
 check = [
 	{ 
 		"token": "true",
-		"module": example.ExampleModule.Echo,
+		"module": example.ExampleModulePack.Echo,
 		"parm": 1,
 		"freq": 1,
 	},
 	{ 
 		"token": "false",
-		"module": example.ExampleModule.Echo,
+		"module": example.ExampleModulePack.Echo,
 		"parm": 0,
 		"freq": 1,
 	},
 	{ 
 		"token": "zulu",
-		"module": example.ExampleModule.Zero,
+		"module": example.ExampleModulePack.Zero,
 		"freq": 1,
 	},
 	{ 
 		"token": "inc",
-		"module": example.ExampleModule.Inc,
+		"module": example.ExampleModulePack.Increment,
 		"parm": 5,
 		"freq": 1,
 	},

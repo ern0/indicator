@@ -247,11 +247,14 @@ class Check(Thread):
 				parm = None
 				
 			self.items[numero].module = configItem["module"]()
+			self.items[numero].module.result = 0
 
 			try:
 				self.items[numero].module.init(parm)
 			except TypeError:
 				self.items[numero].module.init()
+			except AttributeError:
+				pass
 
 			numero += 1
 
