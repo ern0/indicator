@@ -23,9 +23,11 @@ class Indicator:
 		self.about()
 		self.loadConfig()
 
+		self.initParseCliFlags()
 		self.initLoadConfigFlags()
 		self.initCheckEmptyConfig()
 		self.initDevice()
+		self.initDisplay()
 
 		self.initShow()
 		self.initForward()
@@ -50,12 +52,11 @@ class Indicator:
 
 	def loadConfig(self):
 
-		try:
-			self.configName = sys.argv[1]
-		except IndexError:
+		self.configName = self.getFileArg(0)
+		if self.configName is None:
 			self.fatal("config file not specified")
 
-		try: 
+		try:
 			self.config = importmodule(self.configName)
 		except FileNotFoundError:
 			self.fatal("config not found: " + self.configName)
@@ -64,35 +65,63 @@ class Indicator:
 			self.fatal("invalid config: " + str(value))
 
 
+	def getFileArg(self,paramIndex):
+
+		actualIndex = 0
+		first = True
+		for arg in sys.argv:
+			if first:
+				first = False
+				continue
+			if arg[0] == '0': continue
+			if actualIndex == paramIndex: return arg
+			actualIndex += 1
+
+		return None
+
+
+	def hasOptArg(self,paramArg):
+
+		for arg in sys.argv:
+			if arg == paramArg: return True
+
+		return False
+
+
+	def initParseCliFlags(self):
+
+		self.showOnDisplayFlag = self.hasOptArg("--show-on-display")
+
+
 	def initLoadConfigFlags(self):
 
 		self.signature = "whatever"
 
-		try: 
+		try:
 			dummy = self.config.check
 			self.checkFlag = True
 		except AttributeError:
 			self.checkFlag = False
 
-		try: 
+		try:
 			dummy = self.config.show
 			self.showFlag = True
 		except AttributeError:
 			self.showFlag = False
 
-		try: 
+		try:
 			dummy = self.config.listen
 			self.listenFlag = True
 		except AttributeError:
 			self.listenFlag = False
 
-		try: 
+		try:
 			dummy = self.config.forward
 			self.forwardFlag = True
 		except AttributeError:
 			self.forwardFlag = False
 
-		try: 
+		try:
 			dummy = self.config.device
 			self.forcedDeviceFlag = True
 		except AttributeError:
@@ -121,14 +150,20 @@ class Indicator:
 
 		self.openDevice()
 
+		errorMessage = None
 		if self.device is None:
-			if self.forcedDeviceFlag: 
-				self.fatal("device not found: " + self.config.device)
-			else: 
-				self.fatal("no device found")
-			return
+			if self.forcedDeviceFlag:
+				errorMessage = "device not found: " + self.config.device
+			else:
+				errorMessage = "no device found"
 
-		self.noti("device found: " + self.device)
+		if errorMessage is None:
+			self.noti("device found: " + self.device)
+		else:
+			if self.showOnDisplayFlag:
+				self.noti(errorMessage)
+			else:
+				self.fatal(errorMessage)
 
 		self.serialLock = Lock()
 		self.serialData = {}
@@ -138,11 +173,11 @@ class Indicator:
 
 		self.device = None
 
-		try: 
+		try:
 			self.device = self.config.device
 		except AttributeError:
 			self.device = self.detectDevice()
-		
+
 		if self.device is None: return
 
 		try:
@@ -153,26 +188,36 @@ class Indicator:
 
 
 	def detectDevice(self):
-		
+
 		devDir = os.listdir("/dev")
-		for devFile in devDir:			
-		
+		for devFile in devDir:
+
 			if "Bluetooth" in devFile: continue
-			
+
 			found = False
 			if devFile.find("tty.") == 0: found = True
 			if devFile[0:6] == "ttyUSB": found = True
 			if devFile[0:6] == "ttyACM": found = True
-			
+
 			if found: return "/dev/" + devFile
-		
+
 		return None
-		
+
 
 	def send(self,data):
 
 		if not self.showFlag: return
+		if self.device is None: return
+
 		self.serial.write(data.encode())
+
+
+	def initDisplay(self):
+
+		if not self.showOnDisplayFlag: return
+
+		self.noti("showing result on display")
+		self.display = Display()
 
 
 	def initShow(self):
@@ -183,6 +228,8 @@ class Indicator:
 		self.showData = {}
 
 		self.show = Show(self)
+		if self.showOnDisplayFlag:
+			self.show.setDisplay(self.display)
 
 
 	def initForward(self):
@@ -214,7 +261,7 @@ class Indicator:
 			self.forwardData[token] = value
 			self.forwardLock.release()
 
-		if self.showFlag:	
+		if self.showFlag:
 			self.showLock.acquire()
 			self.showData[token] = value
 			self.showLock.release()
@@ -237,15 +284,15 @@ class Check(Thread):
 		numero = 1
 
 		for configItem in self.indicator.config.check:
-			
+
 			configItem["numero"] = numero
 			self.items[numero] = CheckItem(configItem)
 
-			try: 
+			try:
 				parm = configItem["parm"]
-			except KeyError: 
+			except KeyError:
 				parm = None
-				
+
 			self.items[numero].module = configItem["module"]()
 			self.items[numero].module.parameter = parm
 			self.items[numero].module.result = 0
@@ -297,18 +344,18 @@ class CheckItem:
 
 		if self.config["freq"] <= 0: return
 
-		if self.counter == 0: 
-			
+		if self.counter == 0:
+
 			self.module.check()
 			self.result = self.module.getResult()
 
 		self.counter += 1
-		if self.counter >= self.config["freq"]: 
+		if self.counter >= self.config["freq"]:
 			self.counter = 0
 
 
 #----------------------------------------------------------------------
-class Module:	
+class Module:
 
 
 	def getParameter(self):
@@ -342,7 +389,7 @@ class Listen(Thread):
 
 		while True:
 
-			(connection,address) = listenConnection.accept()	
+			(connection,address) = listenConnection.accept()
 			data = connection.recv(2048)
 			data = data.decode("utf-8")
 
@@ -389,16 +436,21 @@ class Show():
 
 
 	def __init__(self,indicator):
-		
+
 		self.indicator = indicator
+		self.display = None
 		self.initSlots()
 
 		time.sleep(2)
 		self.indicator.send("!")
 
 
+	def setDisplay(self,disp):
+		self.display = disp
+
+
 	def initSlots(self):
-		
+
 		config = self.indicator.config.show
 
 		maxSlot = -1
@@ -415,8 +467,8 @@ class Show():
 
 		self.fillSlots()
 		self.composeResult()
-
 		self.indicator.send(self.result)
+		self.showOnDisplay()
 
 
 	def fillSlots(self):
@@ -432,9 +484,9 @@ class Show():
 			try: value = data[token]
 			except KeyError: continue
 
-			try: 
+			try:
 				color = colors[value]
-			except IndexError: 
+			except IndexError:
 				color = colors[len(colors) - 1]
 
 			self.slots[slot] = color
@@ -444,7 +496,7 @@ class Show():
 
 		data = {}
 		self.indicator.showLock.acquire()
-		for i in self.indicator.showData: 
+		for i in self.indicator.showData:
 			data[i] = self.indicator.showData[i]
 		self.indicator.showLock.release()
 
@@ -464,13 +516,33 @@ class Show():
 		self.result += ";"
 
 
+	def showOnDisplay(self):
+
+		if self.display is None: return
+		self.display.render(self.slots)
+
+
+#----------------------------------------------------------------------
+class Display():
+
+	def __init__(self):
+		print("init display ...")
+
+	def render(self,slots):
+
+		print("display",end=" ")
+		for color in slots:
+			print(color,end=" ")
+		print("...")
+
+
 #----------------------------------------------------------------------
 class Forward(Thread):
 
 
 	def __init__(self,indicator):
 		Thread.__init__(self)
-		
+
 		self.indicator = indicator
 		self.errorList = {}
 
@@ -484,7 +556,7 @@ class Forward(Thread):
 				value = data[token]
 				for url in self.indicator.config.forward:
 					self.perform(url,token,value)
-			
+
 			time.sleep(0.2)
 
 
@@ -492,7 +564,7 @@ class Forward(Thread):
 
 		data = {}
 		self.indicator.forwardLock.acquire()
-		for i in self.indicator.forwardData: 
+		for i in self.indicator.forwardData:
 			data[i] = self.indicator.forwardData[i]
 		self.indicator.forwardData = {}
 		self.indicator.forwardLock.release()
@@ -503,25 +575,25 @@ class Forward(Thread):
 	def perform(self,url,token,value):
 
 		a = url.split(":")
-		
-		if a[0] == "https": 
+
+		if a[0] == "https":
 			secure = True
-		else: 
+		else:
 			secure = False
 
 		host = a[1].replace("//","")
 
-		try: 
+		try:
 			port = int(a[2])
-		except ValueError: 
+		except ValueError:
 			port = 80
 
 		req = "?token=" + token
 		req += "&value=" + str(value)
-		
-		if secure: 
+
+		if secure:
 			conn = http.client.HTTPSConnection(host,port,timeout = 2)
-		else: 
+		else:
 			conn = http.client.HTTPConnection(host,port,timeout = 2)
 		try:
 			conn.request("GET","/" + req)
@@ -535,10 +607,10 @@ class Forward(Thread):
 		signature = resp.read().decode("utf-8")
 		conn.close()
 
-		try: 
+		try:
 			del self.errorList[url]
 			self.indicator.noti("connection restored: " + url)
-		except KeyError: 
+		except KeyError:
 			pass
 
 		if signature[0:8] != self.indicator.signature:

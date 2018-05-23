@@ -1,13 +1,13 @@
 #/bin/bash
 clear
 
-#./indicator.py config-local.py ; exit
+./indicator.py config-local.py --show-on-display ; exit
 
 
 if [ "$TERM" != "screen" ]; then
 	tmux  \
 	new-session -s indicator \
-		"./indicator.py config-local.py ; sleep 9999" \; \
+		"./indicator.py config-local.py --show-on-display ; sleep 9999" \; \
 	split-window -p60 \
 		"./indicator.py config-remote.py ; sleep 9999" \; \
 	split-window -p40 \

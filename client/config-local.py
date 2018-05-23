@@ -5,14 +5,14 @@ listen = 9095
 
 check = [
 
-	{ 
+	{
 		"token": "flipflop",
 		"module": e.FlipFlop,
 		"parm": 0,
 		"freq": 2,
 	},
 
-	{ 
+	{
 		"token": "flopflip",
 		"module": e.FlipFlop,
 		"parm": 1,
@@ -20,7 +20,7 @@ check = [
 		"phase": 1,
 	},
 
-	{ 
+	{
 		"token": "ff",
 		"module": e.FlipFlop,
 		"parm": 1,
@@ -56,5 +56,5 @@ show = [
 		"token": "ff",
 		"colors": [ "000", "fff" ],
 	}
-	
+
 ]
