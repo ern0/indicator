@@ -11,8 +11,9 @@ from threading import Thread
 from threading import Lock
 from urllib.parse import parse_qs,urlparse
 import http.client
-from importmodule import importmodule
+import tkinter
 
+from importmodule import importmodule
 
 #----------------------------------------------------------------------
 class Indicator:
@@ -523,17 +524,118 @@ class Show():
 
 
 #----------------------------------------------------------------------
-class Display():
+class Display(Thread):
+
 
 	def __init__(self):
-		print("init display ...")
+		Thread.__init__(self)
+		self.initializedFlag = False
+
+
+	def initialize(self,sn):
+
+		self.initializedFlag = True
+
+		self.initParams(sn)
+		self.window = None
+		self.start()
+
+
+	def initParams(self,sn):
+
+		self.itemNum = sn
+		if self.itemNum < 2: self.itemNum = 2
+		if self.itemNum > 40: self.itemNum = 40
+
+		self.itemWidth = 32
+		self.itemHeight = 32
+
+
+	def initWindow(self):
+
+		self.window = tkinter.Tk()
+		self.window.title("indicator")
+		self.window.geometry(
+			str(self.itemNum * self.itemWidth)
+			+ "x"
+			+ str(self.itemHeight)
+		)
+
+		self.window.bind(
+			"<<render>>"
+			,lambda event: self.procRenderEvt()
+		)
+
+
+	def initItems(self):
+
+		self.items = []
+
+		for i in range(0,self.itemNum):
+
+			item = tkinter.Label(
+				self.window
+				,height = self.itemHeight
+				,width = self.itemWidth
+				,bg = "#ffffff"
+				,text = str(i)
+			)
+
+			item.place(
+				y = 0
+				,x = i * self.itemWidth
+				,width = self.itemWidth
+				,height = self.itemHeight
+			)
+
+			self.items.append(item)
+
+
+	def waitForWindowCreation(self):
+		while self.window is None: time.sleep(0.1)
+
+
+	def run(self):
+
+		self.initWindow()
+		self.initItems()
+
+		self.window.mainloop()
+
 
 	def render(self,slots):
 
-		print("display",end=" ")
-		for color in slots:
-			print(color,end=" ")
-		print("...")
+		if not self.initializedFlag:
+			self.initialize(len(slots))
+			self.waitForWindowCreation()
+
+		self.slots = slots
+		self.window.event_generate("<<render>>")
+
+
+	def procRenderEvt(self):
+
+		for i in range(0,self.itemNum):
+
+			color = self.slots[i]
+			longColorName = (
+				"#"
+				+ color[0] + color[0]
+				+ color[1] + color[1]
+				+ color[2] + color[2]
+			)
+
+			darkness = 0
+			if color[0] == "0": darkness += 1
+			if color[1] == "0": darkness += 1
+			if color[2] == "0": darkness += 1
+			if darkness >= 2: fontColor = "#fff"
+			else: fontColor = "#000"
+
+			self.items[i].config(
+				bg = longColorName
+				,fg = fontColor
+			)
 
 
 #----------------------------------------------------------------------
