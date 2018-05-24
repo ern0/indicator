@@ -566,6 +566,15 @@ class Display(Thread):
 			,lambda event: self.procRenderEvt()
 		)
 
+		self.window.protocol(
+			"WM_DELETE_WINDOW"
+			,lambda: self.windowClosed()
+		)
+
+
+	def windowClosed(self):
+		os._exit(0)
+
 
 	def initItems(self):
 

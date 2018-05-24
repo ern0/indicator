@@ -7,7 +7,7 @@ clear
 if [ "$TERM" != "screen" ]; then
 	tmux  \
 	new-session -s indicator \
-		"./indicator.py config-local.py --show-on-display ; sleep 9999" \; \
+		"./indicator.py config-local.py --show-on-display ; tmux kill-session -t indicator" \; \
 	split-window -p60 \
 		"./indicator.py config-remote.py ; sleep 9999" \; \
 	split-window -p40 \
