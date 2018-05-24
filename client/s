@@ -1,7 +1,7 @@
 #/bin/bash
 clear
 
-./indicator.py config-local.py --show-on-display ; exit
+#./indicator.py config-local.py --show-on-display ; exit
 
 
 if [ "$TERM" != "screen" ]; then
