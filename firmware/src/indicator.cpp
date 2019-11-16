@@ -10,6 +10,7 @@ bool posReset = true;
 unsigned char brite = 30;
 unsigned char mod = MOD_IDLE;
 unsigned char c;
+bool someDelay = false;
 
 struct {
 	int pin;
@@ -51,6 +52,9 @@ void loop() {
 		procMode();
 		break;
 	}
+
+	if (someDelay) delay(50);
+	someDelay = false;
 
 	for (int i = 0; i < BUTTONS; i++) procInputs(i);
 
@@ -181,6 +185,6 @@ void procInputs(int i) {
 	button[i].last = actual;
 
 	if (actual)	Serial.print(i+1);
-	delay(50);
+	someDelay = true;
 
 } // procInputs()
