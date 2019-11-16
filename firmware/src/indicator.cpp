@@ -11,13 +11,33 @@ unsigned char brite = 30;
 unsigned char mod = MOD_IDLE;
 unsigned char c;
 
+struct {
+	int pin;
+	int pressed;
+	int last;
+} button[2];
+
 
 void setup() {
 
+	pinMode(PIN_GND1,OUTPUT);
+	digitalWrite(PIN_GND1,LOW);
+	pinMode(PIN_BUTTON1,INPUT);
+	button[0].pin = PIN_BUTTON1;
+	button[0].pressed = 0;
+
+	pinMode(PIN_GND2,OUTPUT);
+	//digitalWrite(PIN_GND2,HIGH);
+	pinMode(PIN_BUTTON2,INPUT_PULLUP);
+	button[1].pin = PIN_BUTTON2;
+	button[1].pressed = 0;
+
+	for (int i = 0; i < BUTTONS; i++) button[i].last = -1;
+
 	Serial.begin(9600);
+
 	strip.begin();
 	strip.setBrightness(30);
-
 	clear(0xff,0xff,0xff);
 
 } // setup()
@@ -25,10 +45,14 @@ void setup() {
 
 void loop() {
 
-	c = Serial.read();
+	while (Serial.available() > 0) {
+		c = Serial.read();
+		if ( procChar() ) break;
+		procMode();
+		break;
+	}
 
-	procChar();
-	procMode();
+	for (int i = 0; i < BUTTONS; i++) procInputs(i);
 
 } // loop()
 
@@ -81,6 +105,7 @@ bool procChar() {
 
 
 void procMode() {
+	bool isDigit;
 
 	switch (mod) {
 
@@ -88,7 +113,7 @@ void procMode() {
 
 			if (pos >= PIXELS) return;
 
-			bool isDigit = false;
+			isDigit = false;
 			if (('0' <= c) && (c <= '9')) {
 				isDigit = true;
 				c = c - '0';
@@ -146,3 +171,16 @@ void clear(int r,int g,int b) {
 	pos = POS_NONE;
 
 } // clear()
+
+
+void procInputs(int i) {
+
+	int actual = ( digitalRead(button[i].pin) == button[i].pressed );
+
+	if (actual == button[i].last) return;
+	button[i].last = actual;
+
+	if (actual)	Serial.print(i+1);
+	delay(50);
+
+} // procInputs()
